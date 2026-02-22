@@ -168,31 +168,29 @@ var GameManager = {
      /**
      * Обновление карточки после открытия и счётчиков
      */
-        updateCard: function(index, color, redScore, blueScore) {
-            var cards = document.querySelectorAll('.card');
-            if (!cards[index]) return;
-            
-            var card = cards[index];
-            card.classList.add('opened', color);
-            if (gameManager.gameState && gameManager.gameState.role === 'captain') {
-                card.classList.add('captain-opened');
-            }
-            
-            var progressBar = card.querySelector('.hold-progress');
-            if (progressBar) progressBar.remove();
-            
-            var newCard = card.cloneNode(true);
-            card.parentNode.replaceChild(newCard, card);
-            
-            // ⬇️ ОБНОВЛЯЕМ СЧЁТЧИКИ
-            var redCount = document.getElementById('redCount');
-            var blueCount = document.getElementById('blueCount');
-            if (redCount && redScore !== undefined) redCount.textContent = redScore;
-            if (blueCount && blueScore !== undefined) blueCount.textContent = blueScore;
-            
-            this.currentMove++;
-            this._updateStats();
-        },
+    updateCard: function(index, color, redScore, blueScore) {
+        var cards = document.querySelectorAll('.card');
+        if (!cards[index]) return;
+
+        var card = cards[index];
+        card.classList.add('opened', color);
+        if (gameManager.gameState && gameManager.gameState.role === 'captain') {
+            card.classList.add('captain-opened');
+        }
+
+        // удаляем прогресс-бар
+        var progress = card.querySelector('.hold-progress');
+        if (progress) progress.remove();
+
+        // обновляем счётчики
+        var redCount = document.getElementById('redCount');
+        var blueCount = document.getElementById('blueCount');
+        if (redCount && redScore !== undefined) redCount.textContent = redScore;
+        if (blueCount && blueScore !== undefined) blueCount.textContent = blueScore;
+
+        this.currentMove++;
+        this._updateStats();
+    },
 
     /**
      * Обновление информации об игре

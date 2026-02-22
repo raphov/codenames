@@ -266,6 +266,10 @@ body.light-theme {
     filter: grayscale(0.6) brightness(0.7);
     opacity: 1; /* убираем возможную лишнюю прозрачность */
 }
+.card.captain-view.red { background: rgba(255, 107, 107, 0.4); }
+.card.captain-view.blue { background: rgba(107, 166, 255, 0.4); }
+.card.captain-view.black { background: rgba(0, 0, 0, 0.5); }
+.card.captain-view.neutral { background: rgba(160, 168, 183, 0.3); }
 
 /* Удерживание */
 .card.holding {

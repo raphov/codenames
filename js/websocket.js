@@ -65,6 +65,9 @@ var WebSocketManager = {
         try {
             var data = JSON.parse(event.data);
             console.log('📨 Получено:', data.type);
+            if (data.type === 'card_revealed') {
+                console.log('📨 card_revealed details:', data);
+            }
             this._emit(data.type, data);
             this._emit('message', data);
         } catch (e) {
