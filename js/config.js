@@ -1,6 +1,6 @@
 // ==================== КОНФИГУРАЦИЯ ====================
 const CONFIG = {
-    RENDER_URL: 'dzj18p-45-143-236-205.ru.tuna.am',   // только домен, без https://
+    RENDER_URL: 'https://wxwmk0-45-143-236-205.ru.tuna.am',   // только домен, без https://
     HOLD_DURATION: 1500,          // 1.5 секунды удержания
     VERSION: '4.0.0',
     MAX_RECONNECT_ATTEMPTS: 5,
