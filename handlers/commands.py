@@ -19,23 +19,22 @@ async def new_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     room = GameRoom(room_id)
     active_rooms[room_id] = room
 
-    base_url = FRONTEND_URL.rstrip('/')
-    links = {
-        'captain_red': f"{base_url}?room={room_id}&role=captain_red",
-        'captain_blue': f"{base_url}?room={room_id}&role=captain_blue",
-        'agent_red': f"{base_url}?room={room_id}&role=agent_red",
-        'agent_blue': f"{base_url}?room={room_id}&role=agent_blue",
-    }
+    # четыре ссылки с явным указанием роли и команды
+    captain_red = f"{FRONTEND_URL}?room={room_id}&role=captain_red"
+    captain_blue = f"{FRONTEND_URL}?room={room_id}&role=captain_blue"
+    agent_red = f"{FRONTEND_URL}?room={room_id}&role=agent_red"
+    agent_blue = f"{FRONTEND_URL}?room={room_id}&role=agent_blue"
 
     text = (
         f"🎮 **Комната {room_id} создана!**\n\n"
-        f"👑 **Капитан красных:**\n{links['captain_red']}\n\n"
-        f"👑 **Капитан синих:**\n{links['captain_blue']}\n\n"
-        f"🔎 **Агент красных:**\n{links['agent_red']}\n\n"
-        f"🔎 **Агент синих:**\n{links['agent_blue']}\n\n"
-        f"📌 Переходите по своим ссылкам!"
+        f"👑 **Капитан красных:**\n{captain_red}\n\n"
+        f"👑 **Капитан синих:**\n{captain_blue}\n\n"
+        f"🔎 **Агент красных:**\n{agent_red}\n\n"
+        f"🔎 **Агент синих:**\n{agent_blue}\n\n"
+        f"📌 Переходите по своим ссылкам и начинайте игру!"
     )
     await update.message.reply_text(text, parse_mode='Markdown')
+
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(

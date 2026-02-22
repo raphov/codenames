@@ -36,7 +36,7 @@ class GameRoom:
             'current_turn': 1,
             'red_score': 9,
             'blue_score': 8,
-            'game_status': 'waiting',        # waiting, active, finished
+            'game_status': 'active',        # waiting, active, finished
             'winner': None,
         }
 
