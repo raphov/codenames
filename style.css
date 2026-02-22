@@ -6,14 +6,19 @@
     -webkit-tap-highlight-color: transparent;
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--bg-primary);
     color: var(--text-primary);
     min-height: 100vh;
     transition: background 0.3s, color 0.3s;
-    padding: 0;
-    margin: 0;
 }
 
 /* ===== ТЕМЫ ===== */
@@ -49,16 +54,16 @@ body.light-theme {
 
 /* ===== КОНТЕЙНЕР ===== */
 .container {
-    max-width: 100%;
-    margin: 0;
-    padding: 5px;
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    padding: 5px;
+    box-sizing: border-box;
 }
 
 /* ===== ШАПКА (минимальная) ===== */
 .simple-header {
+    flex-shrink: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -109,6 +114,7 @@ body.light-theme {
 
 /* ===== СЧЁТЧИКИ ===== */
 .scoreboard {
+    flex-shrink: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -165,6 +171,11 @@ body.light-theme {
 
 /* ===== ИГРОВОЕ ПОЛЕ ===== */
 .game-board-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 0; /* важно для flexbox */
     padding: 0;
     margin: 0;
     background: transparent;
@@ -174,12 +185,15 @@ body.light-theme {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 4px;
-    padding: 0;
+    width: 100%;
+    height: 100%;
 }
 
 /* ===== КАРТОЧКИ ===== */
 .card {
-    aspect-ratio: 3/4; /* по умолчанию вертикальные */
+    aspect-ratio: 1/1;
+    width: 100%;
+    height: auto;
     background: var(--card-bg);
     border-radius: 12px;
     display: flex;
@@ -188,7 +202,7 @@ body.light-theme {
     font-weight: 700;
     text-align: center;
     padding: 8px 4px;
-    font-size: clamp(12px, 4vw, 16px);
+    font-size: clamp(12px, 3vw, 18px);
     color: var(--text-primary);
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     transition: all 0.1s;
@@ -197,51 +211,63 @@ body.light-theme {
     border: 2px solid transparent;
 }
 
-/* Агент: неоткрытые */
-.card.neutral-closed {
+/* --- Агент: неоткрытые карты серые (нейтральные) --- */
+.agent-view .card:not(.opened) {
     background: var(--card-bg);
     border: 2px solid var(--border-light);
 }
 
-/* Капитан: видит цвета неоткрытых */
-.card.captain-view.red { background: color-mix(in srgb, var(--red-team) 40%, var(--card-bg)); }
-.card.captain-view.blue { background: color-mix(in srgb, var(--blue-team) 40%, var(--card-bg)); }
-.card.captain-view.black { background: color-mix(in srgb, #000 50%, var(--card-bg)); }
-.card.captain-view.neutral { background: color-mix(in srgb, var(--neutral) 30%, var(--card-bg)); }
-
-/* Открытые карты (для всех) */
-.card.opened {
-    border-width: 3px;
-    filter: brightness(0.9);
-}
-
-.card.opened.red {
+/* --- Агент: открытые карты — яркие цвета --- */
+.agent-view .card.opened.red {
     background: var(--red-team);
     color: white;
     border-color: #fff3;
 }
-.card.opened.blue {
+.agent-view .card.opened.blue {
     background: var(--blue-team);
     color: white;
     border-color: #fff3;
 }
-.card.opened.black {
+.agent-view .card.opened.black {
     background: var(--black-card);
     color: white;
     border-color: #fff3;
 }
-.card.opened.neutral {
+.agent-view .card.opened.neutral {
     background: var(--neutral);
     color: white;
     border-color: #fff3;
 }
 
-/* Для капитана открытые карты более блеклые */
-.captain .card.opened {
-    filter: brightness(0.7) saturate(0.8);
+/* --- Капитан: неоткрытые карты — яркие, полупрозрачные --- */
+.captain-view .card:not(.opened).red {
+    background: var(--red-team);
+    opacity: 0.7;
+    color: white;
+}
+.captain-view .card:not(.opened).blue {
+    background: var(--blue-team);
+    opacity: 0.7;
+    color: white;
+}
+.captain-view .card:not(.opened).black {
+    background: var(--black-card);
+    opacity: 0.7;
+    color: white;
+}
+.captain-view .card:not(.opened).neutral {
+    background: var(--neutral);
+    opacity: 0.7;
+    color: white;
 }
 
-/* Удержание */
+/* --- Капитан: открытые карты — блеклые (grayscale + brightness) --- */
+.captain-view .card.opened {
+    filter: grayscale(0.6) brightness(0.7);
+    opacity: 1; /* убираем возможную лишнюю прозрачность */
+}
+
+/* Удерживание */
 .card.holding {
     transform: scale(0.98);
     border-color: var(--accent) !important;
@@ -289,13 +315,13 @@ body.light-theme {
 }
 
 .fullscreen-btn {
-    bottom: 20px;
-    right: 20px;
+    bottom: max(20px, env(safe-area-inset-bottom));
+    right: max(20px, env(safe-area-inset-right));
 }
 
 .burger-btn {
-    bottom: 20px;
-    left: 20px;
+    bottom: max(20px, env(safe-area-inset-bottom));
+    left: max(20px, env(safe-area-inset-left));
     background: var(--bg-secondary);
     color: var(--text-primary);
 }
@@ -325,8 +351,6 @@ body.light-theme {
     overflow-y: auto;
     border: 1px solid var(--border-light);
 }
-
-/* ... стили меню (аналогично предыдущим, но можно упростить) ... */
 
 /* ===== МОДАЛКИ ===== */
 .modal {
@@ -358,7 +382,6 @@ body.light-theme {
         gap: 3px;
     }
     .card {
-        aspect-ratio: 1/1; /* квадратные в ландшафте */
         font-size: clamp(12px, 3.5vw, 18px);
     }
     .scoreboard {
@@ -367,13 +390,27 @@ body.light-theme {
     .team-count { font-size: 1.8rem; }
 }
 
-/* Убираем отступы везде */
-body, .container, .game-board-container {
-    padding: 0;
-    margin: 0;
-}
-
 /* Для очень маленьких экранов */
 @media (max-width: 360px) {
     .card { font-size: 11px; }
 }
+
+/* Уведомления (добавить в HTML) */
+.notification {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: 12px 24px;
+    border-radius: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 1000;
+    display: none;
+    border: 1px solid var(--border-light);
+}
+.notification.show { display: block; }
+.notification.success { background: #10b981; color: white; }
+.notification.error { background: #ef4444; color: white; }
+.notification.info { background: var(--accent); color: white; }

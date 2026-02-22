@@ -30,7 +30,7 @@ function initApp() {
         );
         return;
     }
-
+    document.body.classList.add(roleType + '-view');
     roleType = parsed.type;
     team = parsed.team;
 
