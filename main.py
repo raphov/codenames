@@ -1,27 +1,21 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 import os
+import json
 import logging
 import asyncio
 from datetime import datetime
-from pathlib import Path
-
-from dotenv import load_dotenv
-
-# Загружаем .env до всех импортов, использующих переменные окружения
-env_path = Path('.') / '.env'
-load_dotenv(dotenv_path=env_path)
-
-# Теперь импортируем всё остальное
-import json
 from aiohttp import web
+from dotenv import load_dotenv
+from pathlib import Path
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
 from game.room import GameRoom, active_rooms
 from handlers.commands import start_command, new_command, help_command, unknown_command
 from utils.config import BOT_TOKEN, RENDER_URL
+
+env_path = Path('.') / '.env'
+load_dotenv(dotenv_path=env_path)
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -33,20 +27,17 @@ if not BOT_TOKEN:
     logger.critical("❌ BOT_TOKEN не задан!")
     raise ValueError("BOT_TOKEN обязателен")
 
-# ==================== WEBSOCKET ОБРАБОТЧИК ====================
-
 async def websocket_handler(request):
     ws = web.WebSocketResponse(autoping=True, heartbeat=30)
     await ws.prepare(request)
 
     room_id = request.query.get('room', '').upper()
-    role_param = request.query.get('role', '')  # например, captain_red, agent_blue
+    role_param = request.query.get('role', '')
 
     if not room_id or not role_param:
         await ws.close(code=1008, message=b'Missing room or role')
         return ws
 
-    # разбираем роль и команду
     parts = role_param.split('_')
     if len(parts) != 2 or parts[0] not in ('captain', 'agent') or parts[1] not in ('red', 'blue'):
         await ws.close(code=1008, message=b'Invalid role format')
@@ -61,14 +52,12 @@ async def websocket_handler(request):
 
     room = active_rooms[room_id]
 
-    # сохраняем роль и команду в объекте соединения
     ws.role_type = role_type
     ws.team = team
     room.ws_connections.append(ws)
     logger.info(f"✅ WebSocket подключен: комната {room_id}, роль={role_type}, команда={team}, всего={len(room.ws_connections)}")
 
     try:
-        # отправляем начальное состояние в зависимости от роли
         if role_type == 'captain':
             game_state = room.get_state_for_captain(team)
         else:
@@ -87,7 +76,6 @@ async def websocket_handler(request):
                         if index is None:
                             continue
 
-                        # только агенты могут открывать карты
                         if ws.role_type != 'agent':
                             await ws.send_json({'type': 'error', 'message': 'Только агенты открывают карты'})
                             continue
@@ -96,7 +84,6 @@ async def websocket_handler(request):
                         if 'error' in result:
                             await ws.send_json({'type': 'error', 'message': result['error']})
                         else:
-                            # рассылаем обновление всем в комнате
                             update_msg = {
                                 'type': 'card_revealed',
                                 'index': result['index'],
@@ -113,9 +100,7 @@ async def websocket_handler(request):
                                 })
 
                     elif action == 'reset_game':
-                        # сброс игры (может делать кто угодно, пока без ограничений)
                         room.reset_game()
-                        # отправляем обновлённое состояние каждому с учётом его роли
                         for conn in room.ws_connections:
                             if conn.closed:
                                 continue
@@ -145,9 +130,7 @@ async def websocket_handler(request):
 
     return ws
 
-
 async def broadcast_to_room(room_id: str, message: dict):
-    """Рассылает сообщение всем в комнате"""
     if room_id not in active_rooms:
         return
     room = active_rooms[room_id]
@@ -157,9 +140,6 @@ async def broadcast_to_room(room_id: str, message: dict):
                 await conn.send_json(message)
             except:
                 pass
-
-
-# ==================== HTTP ЭНДПОИНТЫ ====================
 
 async def telegram_webhook(request):
     try:
@@ -171,7 +151,6 @@ async def telegram_webhook(request):
         logger.error(f"❌ Webhook error: {e}")
         return web.Response(text='Error', status=500)
 
-
 async def health_check(request):
     total_connections = sum(len(r.ws_connections) for r in active_rooms.values())
     return web.json_response({
@@ -180,7 +159,6 @@ async def health_check(request):
         'connections': total_connections,
         'timestamp': datetime.now().isoformat()
     })
-
 
 async def cors_handler(request):
     return web.Response(
@@ -191,12 +169,9 @@ async def cors_handler(request):
         }
     )
 
-
-# ==================== ОЧИСТКА СТАРЫХ КОМНАТ ====================
-
 async def cleanup_old_rooms():
     while True:
-        await asyncio.sleep(300)  # каждые 5 минут
+        await asyncio.sleep(300)
         to_remove = []
         for rid, room in list(active_rooms.items()):
             if not room.is_active():
@@ -207,14 +182,9 @@ async def cleanup_old_rooms():
         if to_remove:
             logger.info(f"🧹 Очищено {len(to_remove)} неактивных комнат")
 
-
-# ==================== ЗАПУСК ====================
-
 application = Application.builder().token(BOT_TOKEN).build()
 
-
 async def main():
-    # команды Telegram
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("new", new_command))
     application.add_handler(CommandHandler("help", help_command))
@@ -227,7 +197,6 @@ async def main():
     await application.bot.set_webhook(webhook_url)
     logger.info(f"✅ Вебхук установлен: {webhook_url}")
 
-    # настройка aiohttp сервера
     server = web.Application()
     server.router.add_get('/', health_check)
     server.router.add_get('/health', health_check)
@@ -246,8 +215,7 @@ async def main():
     logger.info(f"🚀 Сервер запущен на порту {port}")
     logger.info(f"🔌 WebSocket endpoint: ws://.../ws?room=XXX&role=XXX")
 
-    await asyncio.Future()  # работаем вечно
-
+    await asyncio.Future()
 
 if __name__ == '__main__':
     try:

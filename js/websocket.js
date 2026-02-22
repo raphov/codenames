@@ -1,11 +1,9 @@
-// ==================== WEBSOCKET МЕНЕДЖЕР ====================
-
 var WebSocketManager = {
     socket: null,
     roomId: null,
-    role: null,           // полная строка роли, например "captain_red"
-    roleType: null,       // "captain" или "agent"
-    team: null,           // "red" или "blue"
+    role: null,
+    roleType: null,
+    team: null,
     reconnectAttempts: 0,
     maxAttempts: CONFIG.MAX_RECONNECT_ATTEMPTS,
     isConnected: false,
@@ -24,7 +22,6 @@ var WebSocketManager = {
         this.roleType = parsed.type;
         this.team = parsed.team;
 
-        // формируем wss URL (без двойного протокола)
         var wsUrl = 'wss://' + CONFIG.RENDER_URL + '/ws?room=' + roomId + '&role=' + role;
         console.log('🔌 Подключение к WebSocket:', wsUrl);
 
@@ -35,22 +32,10 @@ var WebSocketManager = {
 
     _setupEventListeners: function() {
         var self = this;
-
-        this.socket.onopen = function() {
-            self._handleOpen();
-        };
-
-        this.socket.onmessage = function(event) {
-            self._handleMessage(event);
-        };
-
-        this.socket.onerror = function(error) {
-            self._handleError(error);
-        };
-
-        this.socket.onclose = function(event) {
-            self._handleClose(event);
-        };
+        this.socket.onopen = function() { self._handleOpen(); };
+        this.socket.onmessage = function(event) { self._handleMessage(event); };
+        this.socket.onerror = function(error) { self._handleError(error); };
+        this.socket.onclose = function(event) { self._handleClose(event); };
     },
 
     _handleOpen: function() {
@@ -65,9 +50,6 @@ var WebSocketManager = {
         try {
             var data = JSON.parse(event.data);
             console.log('📨 Получено:', data.type);
-            if (data.type === 'card_revealed') {
-                console.log('📨 card_revealed details:', data);
-            }
             this._emit(data.type, data);
             this._emit('message', data);
         } catch (e) {
@@ -95,12 +77,10 @@ var WebSocketManager = {
             this._emit('reconnect_failed');
             return;
         }
-
         this.reconnectAttempts++;
         var delay = 2000 * this.reconnectAttempts;
         console.log('🔄 Переподключение через ' + delay + 'ms (' + this.reconnectAttempts + '/' + this.maxAttempts + ')');
         this._emit('reconnecting', { attempt: this.reconnectAttempts, delay: delay });
-
         setTimeout(function() {
             if (self.roomId && self.role) {
                 self.connect(self.roomId, self.role);

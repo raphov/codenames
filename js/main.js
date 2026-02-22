@@ -12,16 +12,6 @@ function initApp() {
     roomId = params.roomId;
     role = params.role;
 
-    // в функции initApp() после получения params
-    var parsed = parseRole(role);
-    if (!parsed.type || !parsed.team) {
-        UI.showError(
-            '❌ Неверный формат роли',
-            'Роль должна быть вида captain_red или agent_blue. Пожалуйста, получите новую ссылку от бота.'
-        );
-        return;
-    }
-
     if (!roomId || !role) {
         UI.showError(
             '❌ Ошибка: нет параметров комнаты',
@@ -30,13 +20,16 @@ function initApp() {
         );
         return;
     }
-    document.body.classList.add(roleType + '-view');
+
+    var parsed = parseRole(role);
     roleType = parsed.type;
     team = parsed.team;
 
+    // Добавляем класс роли на body для стилизации
+    document.body.classList.add(roleType + '-view');
+
     console.log('📦 Комната:', roomId, 'Роль:', roleType, 'Команда:', team);
 
-    // сохраняем в localStorage для возможного переиспользования
     localStorage.setItem('last_room', roomId);
     localStorage.setItem('last_role', role);
 
@@ -44,7 +37,6 @@ function initApp() {
         UI.elements.roomDisplay.textContent = roomId;
     }
 
-    // инициализация менеджеров
     mobileManager.init();
     eventManager.init();
 
@@ -76,7 +68,6 @@ function setupWebSocketHandlers() {
         gameManager.updateGameInfo(data.game_state);
         UI.elements.gameArea.style.display = 'block';
 
-        // обновляем заголовок с ролью
         if (UI.elements.roomDisplay) {
             var roleText = (roleType === 'captain') ? '👑 Капитан ' + (team === 'red' ? 'красных' : 'синих') : '🔎 Агент ' + (team === 'red' ? 'красных' : 'синих');
             UI.elements.roomDisplay.textContent = roomId + ' - ' + roleText;
@@ -116,7 +107,6 @@ function setupWebSocketHandlers() {
     });
 }
 
-// глобальные функции для уведомлений
 function showNotification(message, type, duration) {
     UI.showNotification(message, type, duration);
 }

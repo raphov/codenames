@@ -17,7 +17,6 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--bg-primary);
     color: var(--text-primary);
-    min-height: 100vh;
     transition: background 0.3s, color 0.3s;
 }
 
@@ -29,11 +28,10 @@ body.dark-theme {
     --text-primary: #ffffff;
     --text-secondary: #b0b8c5;
     --accent: #4f9eff;
-    --accent-soft: #3a7bcb;
-    --red-team: #ff6b6b;
-    --blue-team: #6ba6ff;
-    --neutral: #a0a8b7;
-    --black-card: #2f3542;
+    --red-team: #ff3b3b;
+    --blue-team: #3b82f6;
+    --neutral: #9ca3af;
+    --black-card: #000000;
     --border-light: #333b4b;
 }
 
@@ -44,11 +42,10 @@ body.light-theme {
     --text-primary: #1a2639;
     --text-secondary: #4a5568;
     --accent: #3182ce;
-    --accent-soft: #5a9cff;
-    --red-team: #e53e3e;
-    --blue-team: #3182ce;
-    --neutral: #718096;
-    --black-card: #2d3748;
+    --red-team: #dc2626;
+    --blue-team: #2563eb;
+    --neutral: #6b7280;
+    --black-card: #1f2937;
     --border-light: #cbd5e0;
 }
 
@@ -61,7 +58,7 @@ body.light-theme {
     box-sizing: border-box;
 }
 
-/* ===== ШАПКА (минимальная) ===== */
+/* ===== ШАПКА ===== */
 .simple-header {
     flex-shrink: 0;
     display: flex;
@@ -105,7 +102,7 @@ body.light-theme {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: #fbbf24; /* connecting */
+    background: #fbbf24;
     box-shadow: 0 0 6px currentColor;
 }
 
@@ -175,10 +172,9 @@ body.light-theme {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 0; /* важно для flexbox */
+    min-height: 0;
     padding: 0;
     margin: 0;
-    background: transparent;
 }
 
 .board {
@@ -194,7 +190,6 @@ body.light-theme {
     aspect-ratio: 1/1;
     width: 100%;
     height: auto;
-    background: var(--card-bg);
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -202,76 +197,98 @@ body.light-theme {
     font-weight: 700;
     text-align: center;
     padding: 8px 4px;
-    font-size: clamp(12px, 3vw, 18px);
-    color: var(--text-primary);
+    font-size: clamp(12px, 3vw, 20px);
+    color: white;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    transition: all 0.1s;
+    transition: transform 0.2s, filter 0.3s, background 0.3s;
     position: relative;
     word-break: break-word;
     border: 2px solid transparent;
-}
-
-/* --- Агент: неоткрытые карты серые (нейтральные) --- */
-.agent-view .card:not(.opened) {
     background: var(--card-bg);
-    border: 2px solid var(--border-light);
+    transform-style: preserve-3d;
+    backface-visibility: visible;
 }
 
-/* --- Агент: открытые карты — яркие цвета --- */
-.agent-view .card.opened.red {
-    background: var(--red-team);
+/* ----- АГЕНТ: неоткрытые карты нейтральные (серые) ----- */
+.agent-view .card:not(.opened) {
+    background: var(--neutral);
+    border: 2px solid var(--border-light);
+    color: var(--text-primary);
+}
+
+/* ----- АГЕНТ: открытые карты — яркие цвета ----- */
+.agent-view .card.opened {
     color: white;
     border-color: #fff3;
+    animation: flipIn 0.4s ease-out;
+}
+.agent-view .card.opened.red {
+    background: var(--red-team);
 }
 .agent-view .card.opened.blue {
     background: var(--blue-team);
-    color: white;
-    border-color: #fff3;
 }
 .agent-view .card.opened.black {
     background: var(--black-card);
-    color: white;
-    border-color: #fff3;
 }
 .agent-view .card.opened.neutral {
     background: var(--neutral);
-    color: white;
-    border-color: #fff3;
 }
 
-/* --- Капитан: неоткрытые карты — яркие, полупрозрачные --- */
+/* ----- КАПИТАН: неоткрытые карты — яркие цвета (без прозрачности) ----- */
 .captain-view .card:not(.opened).red {
     background: var(--red-team);
-    opacity: 0.7;
     color: white;
 }
 .captain-view .card:not(.opened).blue {
     background: var(--blue-team);
-    opacity: 0.7;
     color: white;
 }
 .captain-view .card:not(.opened).black {
     background: var(--black-card);
-    opacity: 0.7;
     color: white;
 }
 .captain-view .card:not(.opened).neutral {
     background: var(--neutral);
-    opacity: 0.7;
     color: white;
 }
 
-/* --- Капитан: открытые карты — блеклые (grayscale + brightness) --- */
+/* ----- КАПИТАН: открытые карты — блеклые ----- */
 .captain-view .card.opened {
-    filter: grayscale(0.6) brightness(0.7);
-    opacity: 1; /* убираем возможную лишнюю прозрачность */
+    filter: grayscale(0.5) brightness(0.7);
 }
-.card.captain-view.red { background: rgba(255, 107, 107, 0.4); }
-.card.captain-view.blue { background: rgba(107, 166, 255, 0.4); }
-.card.captain-view.black { background: rgba(0, 0, 0, 0.5); }
-.card.captain-view.neutral { background: rgba(160, 168, 183, 0.3); }
+.captain-view .card.opened.red {
+    background: var(--red-team);
+}
+.captain-view .card.opened.blue {
+    background: var(--blue-team);
+}
+.captain-view .card.opened.black {
+    background: var(--black-card);
+}
+.captain-view .card.opened.neutral {
+    background: var(--neutral);
+}
 
-/* Удерживание */
+/* Анимация поворота */
+@keyframes flipIn {
+    0% {
+        transform: perspective(400px) rotateY(90deg);
+        opacity: 0;
+    }
+    40% {
+        transform: perspective(400px) rotateY(-10deg);
+    }
+    70% {
+        transform: perspective(400px) rotateY(5deg);
+    }
+    100% {
+        transform: perspective(400px) rotateY(0);
+        opacity: 1;
+    }
+}
+
+/* Удержание */
 .card.holding {
     transform: scale(0.98);
     border-color: var(--accent) !important;
@@ -332,74 +349,26 @@ body.light-theme {
 
 .fab:active { transform: scale(0.9); }
 
-/* ===== БУРГЕР-МЕНЮ ===== */
-.menu-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    z-index: 200;
-    display: none;
-}
-
-.menu-content {
-    position: fixed;
-    bottom: 80px;
-    left: 20px;
-    right: 20px;
-    background: var(--bg-secondary);
-    border-radius: 24px;
-    padding: 20px;
-    z-index: 201;
-    display: none;
-    max-height: 70vh;
-    overflow-y: auto;
-    border: 1px solid var(--border-light);
-}
-
-/* ===== МОДАЛКИ ===== */
-.modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.8);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 300;
-    padding: 20px;
-}
-
-.modal.show { display: flex; }
-
-.modal-content {
-    background: var(--bg-secondary);
-    border-radius: 24px;
-    max-width: 400px;
-    width: 100%;
-    max-height: 80vh;
-    overflow-y: auto;
-    border: 1px solid var(--border-light);
-}
-
-/* ===== АДАПТАЦИЯ ПОД ОРИЕНТАЦИЮ ===== */
-@media (orientation: landscape) {
+/* ===== АДАПТАЦИЯ ПОД ЛАНДШАФТ ===== */
+@media (orientation: landscape) and (max-height: 500px) {
+    .simple-header, .scoreboard {
+        padding: 4px 8px;
+        margin-bottom: 4px;
+        font-size: 0.8rem;
+    }
+    .team-count {
+        font-size: 1.5rem;
+    }
     .board {
-        gap: 3px;
+        gap: 2px;
     }
     .card {
-        font-size: clamp(12px, 3.5vw, 18px);
+        font-size: clamp(10px, 2.5vw, 16px);
+        padding: 4px 2px;
     }
-    .scoreboard {
-        padding: 8px 12px;
-    }
-    .team-count { font-size: 1.8rem; }
 }
 
-/* Для очень маленьких экранов */
-@media (max-width: 360px) {
-    .card { font-size: 11px; }
-}
-
-/* Уведомления (добавить в HTML) */
+/* Уведомления */
 .notification {
     position: fixed;
     bottom: 100px;

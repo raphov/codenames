@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Codenames Online">
     <title>Codenames Online</title>
-    <link rel="stylesheet" href="style.css?v=4.0.6">
+    <link rel="stylesheet" href="style.css?v=4.0.2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body class="dark-theme"> <!-- по умолчанию тёмная -->
+<body class="dark-theme">
     <div class="container">
-        <!-- Только название и комната -->
         <header class="simple-header">
             <h1><i class="fas fa-user-secret"></i> Codenames</h1>
             <div class="room-tag">
@@ -20,9 +19,7 @@
             </div>
         </header>
 
-        <!-- Игровая область -->
         <div id="gameArea" style="display: none;">
-            <!-- Счётчики команд -->
             <div class="scoreboard">
                 <div class="team-score red">
                     <span class="team-label"><i class="fas fa-fire"></i> Красные</span>
@@ -38,14 +35,12 @@
                 </div>
             </div>
 
-            <!-- Поле 5x5 -->
             <div class="game-board-container">
                 <div class="board" id="gameBoard"></div>
                 <div class="hold-hint" id="holdHint"><i class="fas fa-hand-point-up"></i> Удерживайте 2с</div>
             </div>
         </div>
 
-        <!-- Плавающие кнопки -->
         <button class="fab fullscreen-btn" id="btnFullscreen" title="Во весь экран">
             <i class="fas fa-expand"></i>
         </button>
@@ -53,7 +48,6 @@
             <i class="fas fa-bars"></i>
         </div>
 
-        <!-- Бургер-меню -->
         <div class="menu-overlay" id="menuOverlay"></div>
         <div class="menu-content" id="menuContent">
             <div class="menu-header">
@@ -85,21 +79,23 @@
             </div>
         </div>
 
-        <!-- Модалки (оставляем как есть, только стили) -->
+        <!-- Модалки (содержимое нужно добавить) -->
         <div id="rulesModal" class="modal">...</div>
         <div id="hotkeysModal" class="modal">...</div>
         <div id="aboutModal" class="modal">...</div>
-    </div>
-    <div id="notification" class="notification"></div>
 
-    <!-- Скрипты (порядок важен) -->
-    <script src="js/config.js?v=4.0.6"></script>
-    <script src="js/utils.js?v=4.0.6"></script>
-    <script src="js/websocket.js?v=4.0.6"></script>
-    <script src="js/game.js?v=4.0.6"></script>
-    <script src="js/ui.js?v=4.0.6"></script>
-    <script src="js/mobile.js?v=4.0.6"></script>
-    <script src="js/events.js?v=4.0.6"></script>
-    <script src="js/main.js?v=4.0.6"></script>
+        <!-- Уведомления -->
+        <div id="notification" class="notification"></div>
+    </div>
+
+    <!-- Скрипты с параметром версии -->
+    <script src="js/config.js?v=4.0.2"></script>
+    <script src="js/utils.js?v=4.0.2"></script>
+    <script src="js/websocket.js?v=4.0.2"></script>
+    <script src="js/game.js?v=4.0.2"></script>
+    <script src="js/ui.js?v=4.0.2"></script>
+    <script src="js/mobile.js?v=4.0.2"></script>
+    <script src="js/events.js?v=4.0.2"></script>
+    <script src="js/main.js?v=4.0.2"></script>
 </body>
 </html>
