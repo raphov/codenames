@@ -3,16 +3,15 @@
 var WebSocketManager = {
     socket: null,
     roomId: null,
-    role: null,
+    role: null,           // полная строка роли, например "captain_red"
+    roleType: null,       // "captain" или "agent"
+    team: null,           // "red" или "blue"
     reconnectAttempts: 0,
     maxAttempts: CONFIG.MAX_RECONNECT_ATTEMPTS,
     isConnected: false,
     messageHandlers: {},
     pingInterval: null,
 
-    /**
-     * Подключение к WebSocket
-     */
     connect: function(roomId, role) {
         if (!roomId || !role) {
             console.error('❌ Нет roomId или role');
@@ -21,42 +20,39 @@ var WebSocketManager = {
 
         this.roomId = roomId;
         this.role = role;
+        var parsed = parseRole(role);
+        this.roleType = parsed.type;
+        this.team = parsed.team;
 
+        // формируем wss URL (без двойного протокола)
         var wsUrl = 'wss://' + CONFIG.RENDER_URL + '/ws?room=' + roomId + '&role=' + role;
         console.log('🔌 Подключение к WebSocket:', wsUrl);
-        
+
         this.socket = new WebSocket(wsUrl);
         this._setupEventListeners();
-        
         return true;
     },
 
-    /**
-     * Настройка обработчиков событий
-     */
     _setupEventListeners: function() {
         var self = this;
-        
+
         this.socket.onopen = function() {
             self._handleOpen();
         };
-        
+
         this.socket.onmessage = function(event) {
             self._handleMessage(event);
         };
-        
+
         this.socket.onerror = function(error) {
             self._handleError(error);
         };
-        
+
         this.socket.onclose = function(event) {
             self._handleClose(event);
         };
     },
 
-    /**
-     * Обработчик открытия соединения
-     */
     _handleOpen: function() {
         console.log('✅ WebSocket подключен');
         this.isConnected = true;
@@ -65,9 +61,6 @@ var WebSocketManager = {
         this._emit('connected');
     },
 
-    /**
-     * Обработчик входящих сообщений
-     */
     _handleMessage: function(event) {
         try {
             var data = JSON.parse(event.data);
@@ -79,17 +72,11 @@ var WebSocketManager = {
         }
     },
 
-    /**
-     * Обработчик ошибок
-     */
     _handleError: function(error) {
         console.error('❌ WebSocket ошибка:', error);
         this._emit('error', error);
     },
 
-    /**
-     * Обработчик закрытия соединения
-     */
     _handleClose: function(event) {
         console.log('❌ WebSocket отключен');
         this.isConnected = false;
@@ -98,12 +85,8 @@ var WebSocketManager = {
         this._reconnect();
     },
 
-    /**
-     * Переподключение
-     */
     _reconnect: function() {
         var self = this;
-        
         if (this.reconnectAttempts >= this.maxAttempts) {
             console.error('❌ Превышено количество попыток переподключения');
             this._emit('reconnect_failed');
@@ -112,10 +95,9 @@ var WebSocketManager = {
 
         this.reconnectAttempts++;
         var delay = 2000 * this.reconnectAttempts;
-        
         console.log('🔄 Переподключение через ' + delay + 'ms (' + this.reconnectAttempts + '/' + this.maxAttempts + ')');
         this._emit('reconnecting', { attempt: this.reconnectAttempts, delay: delay });
-        
+
         setTimeout(function() {
             if (self.roomId && self.role) {
                 self.connect(self.roomId, self.role);
@@ -123,9 +105,6 @@ var WebSocketManager = {
         }, delay);
     },
 
-    /**
-     * Отправка сообщения
-     */
     send: function(data) {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(JSON.stringify(data));
@@ -134,9 +113,6 @@ var WebSocketManager = {
         return false;
     },
 
-    /**
-     * Запуск пинга
-     */
     _startPing: function() {
         var self = this;
         this._stopPing();
@@ -147,9 +123,6 @@ var WebSocketManager = {
         }, CONFIG.PING_INTERVAL);
     },
 
-    /**
-     * Остановка пинга
-     */
     _stopPing: function() {
         if (this.pingInterval) {
             clearInterval(this.pingInterval);
@@ -157,9 +130,6 @@ var WebSocketManager = {
         }
     },
 
-    /**
-     * Подписка на события
-     */
     on: function(event, callback) {
         if (!this.messageHandlers[event]) {
             this.messageHandlers[event] = [];
@@ -167,9 +137,6 @@ var WebSocketManager = {
         this.messageHandlers[event].push(callback);
     },
 
-    /**
-     * Отписка от событий
-     */
     off: function(event, callback) {
         if (this.messageHandlers[event]) {
             var handlers = this.messageHandlers[event];
@@ -180,9 +147,6 @@ var WebSocketManager = {
         }
     },
 
-    /**
-     * Вызов обработчиков
-     */
     _emit: function(event, data) {
         if (this.messageHandlers[event]) {
             var handlers = this.messageHandlers[event];
@@ -196,9 +160,6 @@ var WebSocketManager = {
         }
     },
 
-    /**
-     * Закрытие соединения
-     */
     disconnect: function() {
         this._stopPing();
         if (this.socket) {
@@ -209,5 +170,4 @@ var WebSocketManager = {
     }
 };
 
-// Создаём глобальный экземпляр
 var wsManager = WebSocketManager;

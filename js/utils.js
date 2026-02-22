@@ -7,7 +7,19 @@ function getUrlParams() {
     var params = new URLSearchParams(window.location.search);
     return {
         roomId: params.get('room') ? params.get('room').toUpperCase() : null,
-        role: params.get('role') || 'agent'
+        role: params.get('role') || null   // например, captain_red
+    };
+}
+
+/**
+ * Разбор строки роли на тип и команду
+ */
+function parseRole(role) {
+    if (!role) return { type: null, team: null };
+    var parts = role.split('_');
+    return {
+        type: parts[0],  // 'captain' или 'agent'
+        team: parts[1]   // 'red' или 'blue'
     };
 }
 
@@ -19,7 +31,6 @@ function copyToClipboard(text) {
         navigator.clipboard.writeText(text);
         return true;
     } catch (err) {
-        // Резервный метод
         var textArea = document.createElement('textarea');
         textArea.value = text;
         document.body.appendChild(textArea);
@@ -28,15 +39,6 @@ function copyToClipboard(text) {
         document.body.removeChild(textArea);
         return true;
     }
-}
-
-/**
- * Форматирование времени
- */
-function formatTime(seconds) {
-    var mins = Math.floor(seconds / 60);
-    var secs = seconds % 60;
-    return mins + ':' + (secs < 10 ? '0' + secs : secs);
 }
 
 /**
@@ -55,22 +57,22 @@ function debounce(func, wait) {
 }
 
 /**
- * Генерация цвета команды
+ * Цвет команды для отображения
  */
 function getTeamColor(team) {
     switch (team) {
         case 'red': return '#f87171';
         case 'blue': return '#60a5fa';
-        case 'black': return '#000000';
         default: return '#d97706';
     }
 }
 
 /**
- * Экранирование HTML
+ * Название команды
  */
-function escapeHtml(text) {
-    var div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
+var TEAM_NAMES = {
+    red: 'Красные',
+    blue: 'Синие',
+    black: 'Чёрная',
+    neutral: 'Нейтральная'
+};
