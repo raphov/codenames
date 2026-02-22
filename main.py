@@ -2,25 +2,26 @@
 # -*- coding: utf-8 -*-
 
 import os
-import json
 import logging
 import asyncio
 from datetime import datetime
-from aiohttp import web
-from dotenv import load_dotenv
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+# Загружаем .env до всех импортов, использующих переменные окружения
+env_path = Path('.') / '.env'
+load_dotenv(dotenv_path=env_path)
+
+# Теперь импортируем всё остальное
+import json
+from aiohttp import web
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
-# единая модель комнаты
 from game.room import GameRoom, active_rooms
 from handlers.commands import start_command, new_command, help_command, unknown_command
 from utils.config import BOT_TOKEN, RENDER_URL
-
-# загрузка переменных окружения
-env_path = Path('.') / '.env'
-load_dotenv(dotenv_path=env_path)
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
