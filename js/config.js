@@ -1,38 +1,38 @@
 // ==================== КОНФИГУРАЦИЯ ====================
-var CONFIG = {
+const CONFIG = {
     //RENDER_URL: 'codenames-u88n.onrender.com',
     RENDER_URL: 'https://pq2sfu-45-143-236-205.ru.tuna.am',          // ваш URL от Tuna (без https://)
     HOLD_DURATION: 1200, 
     VERSION: '3.1.0',
     MAX_RECONNECT_ATTEMPTS: 5,
     PING_INTERVAL: 30000,
-    ROOM_LIFETIME: 24 * 60 * 60 * 1000
+    ROOM_LIFETIME: 24 * 60 * 60 * 1000,
     THEMES: {
         DARK: 'dark-theme',
         LIGHT: 'light-theme'
     }
 };
 
-var TEAMS = {
+const TEAMS = {
     RED: 'red',
     BLUE: 'blue',
     BLACK: 'black',
     NEUTRAL: 'neutral'
 };
 
-var TEAM_NAMES = {
+const TEAM_NAMES = {
     red: 'Красные',
     blue: 'Синие',
     black: 'Убийца',
     neutral: 'Нейтральные'
 };
 
-var ROLES = {
+const ROLES = {
     CAPTAIN: 'captain',
     AGENT: 'agent'
 };
 
-var GAME_STATUS = {
+const GAME_STATUS = {
     WAITING: 'waiting',
     ACTIVE: 'active',
     FINISHED: 'finished'
