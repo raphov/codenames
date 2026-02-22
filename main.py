@@ -1,21 +1,24 @@
 #!/usr/bin/env python3
 import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Загружаем .env до всех остальных импортов
+env_path = Path('.') / '.env'
+load_dotenv(dotenv_path=env_path)
+
+# Теперь можно импортировать модули, которые используют переменные окружения
 import json
 import logging
 import asyncio
 from datetime import datetime
 from aiohttp import web
-from dotenv import load_dotenv
-from pathlib import Path
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
 from game.room import GameRoom, active_rooms
 from handlers.commands import start_command, new_command, help_command, unknown_command
 from utils.config import BOT_TOKEN, RENDER_URL
-
-env_path = Path('.') / '.env'
-load_dotenv(dotenv_path=env_path)
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -27,6 +30,7 @@ if not BOT_TOKEN:
     logger.critical("❌ BOT_TOKEN не задан!")
     raise ValueError("BOT_TOKEN обязателен")
 
+# ==================== WEBSOCKET ====================
 async def websocket_handler(request):
     ws = web.WebSocketResponse(autoping=True, heartbeat=30)
     await ws.prepare(request)
@@ -130,6 +134,7 @@ async def websocket_handler(request):
 
     return ws
 
+
 async def broadcast_to_room(room_id: str, message: dict):
     if room_id not in active_rooms:
         return
@@ -141,6 +146,8 @@ async def broadcast_to_room(room_id: str, message: dict):
             except:
                 pass
 
+
+# ==================== HTTP ====================
 async def telegram_webhook(request):
     try:
         data = await request.json()
@@ -151,6 +158,7 @@ async def telegram_webhook(request):
         logger.error(f"❌ Webhook error: {e}")
         return web.Response(text='Error', status=500)
 
+
 async def health_check(request):
     total_connections = sum(len(r.ws_connections) for r in active_rooms.values())
     return web.json_response({
@@ -159,6 +167,7 @@ async def health_check(request):
         'connections': total_connections,
         'timestamp': datetime.now().isoformat()
     })
+
 
 async def cors_handler(request):
     return web.Response(
@@ -169,6 +178,8 @@ async def cors_handler(request):
         }
     )
 
+
+# ==================== ОЧИСТКА ====================
 async def cleanup_old_rooms():
     while True:
         await asyncio.sleep(300)
@@ -182,7 +193,10 @@ async def cleanup_old_rooms():
         if to_remove:
             logger.info(f"🧹 Очищено {len(to_remove)} неактивных комнат")
 
+
+# ==================== ЗАПУСК ====================
 application = Application.builder().token(BOT_TOKEN).build()
+
 
 async def main():
     application.add_handler(CommandHandler("start", start_command))
@@ -216,6 +230,7 @@ async def main():
     logger.info(f"🔌 WebSocket endpoint: ws://.../ws?room=XXX&role=XXX")
 
     await asyncio.Future()
+
 
 if __name__ == '__main__':
     try:
