@@ -1,7 +1,7 @@
 // ==================== КОНФИГУРАЦИЯ ====================
 const CONFIG = {
     //RENDER_URL: 'codenames-u88n.onrender.com',
-    RENDER_URL: 'https://mk2urt-45-143-236-205.ru.tuna.am',          // ваш URL от Tuna (без https://)
+    RENDER_URL: 'https://pq2sfu-45-143-236-205.ru.tuna.am',          // ваш URL от Tuna (без https://)
     HOLD_DURATION: 1200, 
     VERSION: '3.1.0',
     MAX_RECONNECT_ATTEMPTS: 5,
@@ -37,15 +37,3 @@ const GAME_STATUS = {
     ACTIVE: 'active',
     FINISHED: 'finished'
 };
-
-
-const CONFIG = {
-    RENDER_URL: 'codenames-u88n.onrender.com',
-    HOLD_DURATION: 2000,
-    VERSION: '4.0.0',
-    MAX_RECONNECT_ATTEMPTS: 5,
-    PING_INTERVAL: 30000,
-
-};
-
-
