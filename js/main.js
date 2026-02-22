@@ -12,6 +12,16 @@ function initApp() {
     roomId = params.roomId;
     role = params.role;
 
+    // в функции initApp() после получения params
+    var parsed = parseRole(role);
+    if (!parsed.type || !parsed.team) {
+        UI.showError(
+            '❌ Неверный формат роли',
+            'Роль должна быть вида captain_red или agent_blue. Пожалуйста, получите новую ссылку от бота.'
+        );
+        return;
+    }
+
     if (!roomId || !role) {
         UI.showError(
             '❌ Ошибка: нет параметров комнаты',
@@ -21,7 +31,6 @@ function initApp() {
         return;
     }
 
-    var parsed = parseRole(role);
     roleType = parsed.type;
     team = parsed.team;
 
