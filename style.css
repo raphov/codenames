@@ -10,7 +10,7 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    overflow: hidden; /* убираем скроллы на уровне документа */
 }
 
 body {
@@ -44,14 +44,14 @@ body.light-theme {
     --accent: #3182ce;
     --red-team: #dc2626;
     --blue-team: #2563eb;
-    --neutral: #6b7280;
+    --neutral: #f1f3f5;        /* изменено: почти белый */
     --black-card: #1f2937;
     --border-light: #cbd5e0;
 }
 
 /* ===== КОНТЕЙНЕР ===== */
 .container {
-    height: 100vh;
+    height: 100vh;              /* или можно использовать 100dvh для мобильных */
     display: flex;
     flex-direction: column;
     padding: 5px;
@@ -168,11 +168,11 @@ body.light-theme {
 
 /* ===== ИГРОВОЕ ПОЛЕ ===== */
 .game-board-container {
-    flex: 1;
+    flex: 1;                    /* занимает всё оставшееся пространство */
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 0;
+    min-height: 0;              /* критично для сжатия в flex */
     padding: 0;
     margin: 0;
 }
@@ -182,14 +182,15 @@ body.light-theme {
     grid-template-columns: repeat(5, 1fr);
     gap: 4px;
     width: 100%;
-    height: 100%;
+    height: 100%;               /* занимает всю высоту родителя */
+    min-height: 0;              /* разрешает сжатие */
 }
 
 /* ===== КАРТОЧКИ ===== */
 .card {
     aspect-ratio: 1/1;
     width: 100%;
-    height: auto;
+    height: auto;               /* высота подстраивается под ширину */
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -350,22 +351,28 @@ body.light-theme {
 .fab:active { transform: scale(0.9); }
 
 /* ===== АДАПТАЦИЯ ПОД ЛАНДШАФТ ===== */
-@media (orientation: landscape) and (max-height: 500px) {
-    .simple-header, .scoreboard {
-        padding: 4px 8px;
-        margin-bottom: 4px;
-        font-size: 0.8rem;
-    }
-    .team-count {
-        font-size: 1.5rem;
+@media (orientation: landscape) {
+    /* Убедимся, что все flex-элементы правильно сжимаются */
+    .game-board-container {
+        flex: 1;
+        min-height: 0;
     }
     .board {
-        gap: 2px;
+        height: 100%;
+        min-height: 0;
     }
     .card {
-        font-size: clamp(10px, 2.5vw, 16px);
-        padding: 4px 2px;
+        font-size: clamp(12px, 3.5vw, 18px);
     }
+    .scoreboard {
+        padding: 8px 12px;
+    }
+    .team-count { font-size: 1.8rem; }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 360px) {
+    .card { font-size: 11px; }
 }
 
 /* Уведомления */

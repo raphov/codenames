@@ -24,7 +24,7 @@ class GameRoom:
             'current_turn': 1,
             'red_score': 9,
             'blue_score': 8,
-            'game_status': 'waiting',
+            'game_status': 'active',          # <--- изменено с 'waiting' на 'active'
             'winner': None,
         }
 
@@ -71,8 +71,7 @@ class GameRoom:
             return {'error': 'Неверный индекс карты'}
         if self.game_state['revealed'][index]:
             return {'error': 'Карта уже открыта'}
-        if self.game_state['game_status'] != 'active':
-            return {'error': 'Игра ещё не началась или уже закончена'}
+        # Убрана проверка на game_status, так как игра всегда активна
         if agent_team != self.game_state['current_team']:
             return {'error': 'Сейчас не ваш ход'}
 
