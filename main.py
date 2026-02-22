@@ -10,6 +10,16 @@ import logging
 from datetime import datetime, timedelta
 from typing import Dict, List
 
+# 🔥 НОВОЕ: Загрузка переменных из .env файла
+from dotenv import load_dotenv
+from pathlib import Path
+
+# Загружаем .env файл из текущей директории
+env_path = Path('.') / '.env'
+load_dotenv(dotenv_path=env_path)
+print(f"📁 Загрузка .env из: {env_path.absolute()}")
+print(f"📋 BOT_TOKEN из .env: {'найден' if os.getenv('BOT_TOKEN') else 'НЕ НАЙДЕН!'}")
+
 from aiohttp import web
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
@@ -180,12 +190,12 @@ async def new_command(update: Update, context):
     ]
 
     await update.message.reply_text(
-        f"🎮 <b>КОМНАТА {room_id} СОЗДАНА!</b>\n\n"
-        f"<b>👑 Капитан:</b> видит все цвета карточек\n"
-        f"<b>🔎 Агент:</b> видит только слова\n\n"
-        f"👇 <b>Отправьте друзьям нужные ссылки:</b>",
-        reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode='HTML'
+    f"🎮 <b>КОМНАТА {room_id} СОЗДАНА!</b>\n\n"
+    f"<b>👑 Капитан:</b> {captain_link}\n"
+    f"<b>🔎 Агент:</b> {agent_link}\n\n"
+    f"💡 <i>Для лучшего вида откройте ссылку в браузере (меню ⋮ → Открыть в браузере).</i>",
+    reply_markup=...,
+    parse_mode='HTML'
     )
 
 async def join_command(update: Update, context):

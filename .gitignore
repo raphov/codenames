@@ -1,0 +1,8 @@
+# В файле .gitignore добавьте:
+.env
+.env.local
+*.log
+__pycache__/
+venv/
+my-ssh-key
+my-ssh-key.pub

@@ -48,13 +48,15 @@ var GameManager = {
             if (gameState.colors && gameState.colors[index]) {
                 card.classList.add(gameState.colors[index]);
             }
+            // Для капитана дополнительный класс (чтобы сделать блеклыми)
+            if (isCaptain) {
+                card.classList.add('captain-opened');
+            }
         }
-        // Если капитан и карточка не открыта – показываем цвет
+        // Если капитан и карточка не открыта – показываем цвет (полупрозрачный)
         else if (isCaptain && gameState.colors) {
             card.classList.add('captain-view');
             card.classList.add(gameState.colors[index]);
-            card.style.opacity = '0.85';
-            // ❌ Короны убраны – больше не добавляем hint с короной
         }
         // Если агент и карточка не открыта
         else {
@@ -172,7 +174,9 @@ var GameManager = {
             
             var card = cards[index];
             card.classList.add('opened', color);
-            card.style.opacity = '1';
+            if (gameManager.gameState && gameManager.gameState.role === 'captain') {
+                card.classList.add('captain-opened');
+            }
             
             var progressBar = card.querySelector('.hold-progress');
             if (progressBar) progressBar.remove();

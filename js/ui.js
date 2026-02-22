@@ -3,7 +3,7 @@
 var UIManager = {
     elements: {},
     notificationTimeout: null,
-    activeModal: null,
+    currentTheme: localStorage.getItem('codenames_theme') || CONFIG.THEMES.DARK,
 
     /**
      * Инициализация DOM элементов
@@ -15,24 +15,40 @@ var UIManager = {
             gameArea: document.getElementById('gameArea'),
             gameBoard: document.getElementById('gameBoard'),
             notification: document.getElementById('notification'),
-            playerCount: document.getElementById('playerCount'),
-            playersList: document.getElementById('playersList'),
-            rulesModal: document.getElementById('rulesModal'),
-            hotkeysModal: document.getElementById('hotkeysModal'),
-            aboutModal: document.getElementById('aboutModal'),
+            redCount: document.getElementById('redCount'),
+            blueCount: document.getElementById('blueCount'),
+            currentTurn: document.getElementById('currentTurn'),
+            openedCards: document.getElementById('openedCards'),
+            currentMove: document.getElementById('currentMove'),
             menuContent: document.getElementById('menuContent'),
             menuOverlay: document.getElementById('menuOverlay'),
             burgerBtn: document.getElementById('burgerBtn'),
             closeMenu: document.getElementById('closeMenu'),
             btnFullscreen: document.getElementById('btnFullscreen'),
-            redCount: document.getElementById('redCount'),
-            blueCount: document.getElementById('blueCount'),
-            currentTurn: document.getElementById('currentTurn'),
-            openedCards: document.getElementById('openedCards'),
-            currentMove: document.getElementById('currentMove')
+            themeToggle: document.getElementById('themeToggle')
         };
-        
-        return this.elements;
+        this.applyTheme(this.currentTheme);
+        this.updateThemeButton();
+    },
+
+    applyTheme: function(theme) {
+        document.body.classList.remove(CONFIG.THEMES.DARK, CONFIG.THEMES.LIGHT);
+        document.body.classList.add(theme);
+        localStorage.setItem('codenames_theme', theme);
+        this.currentTheme = theme;
+        this.updateThemeButton();
+    },
+
+    toggleTheme: function() {
+        var newTheme = this.currentTheme === CONFIG.THEMES.DARK ? CONFIG.THEMES.LIGHT : CONFIG.THEMES.DARK;
+        this.applyTheme(newTheme);
+    },
+
+    updateThemeButton: function() {
+        var btn = this.elements.themeToggle;
+        if (!btn) return;
+        var isDark = this.currentTheme === CONFIG.THEMES.DARK;
+        btn.innerHTML = isDark ? '<i class="fas fa-sun"></i> Светлая' : '<i class="fas fa-moon"></i> Тёмная';
     },
 
     /**
@@ -69,6 +85,32 @@ var UIManager = {
             notification.classList.remove('show');
             clearTimeout(self.notificationTimeout);
         };
+    },
+
+    /**
+     * Переключатель режима
+     */
+    toggleMenu: function() {
+        var menu = this.elements.menuContent;
+        var overlay = this.elements.menuOverlay;
+        if (!menu || !overlay) return;
+        if (menu.style.display === 'block') {
+            menu.style.display = 'none';
+            overlay.style.display = 'none';
+            document.body.style.overflow = '';
+        } else {
+            menu.style.display = 'block';
+            overlay.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+    },
+
+    closeMenu: function() {
+        var menu = this.elements.menuContent;
+        var overlay = this.elements.menuOverlay;
+        if (menu) menu.style.display = 'none';
+        if (overlay) overlay.style.display = 'none';
+        document.body.style.overflow = '';
     },
 
     /**

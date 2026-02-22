@@ -165,6 +165,14 @@ var EventManager = {
                 showNotification('Роль можно сменить только при создании комнаты', 'info');
             });
         }
+
+        // Обработчик кнопки темы
+        var themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function() {
+                UI.toggleTheme();
+            });
+        }
     },
 
     /**
