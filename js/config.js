@@ -1,6 +1,6 @@
 // ==================== КОНФИГУРАЦИЯ ====================
 const CONFIG = {
-    RENDER_URL: 'wxwmk0-45-143-236-205.ru.tuna.am',   // только домен, без https://
+    RENDER_URL: window.location.host,  // автоматически берёт текущий домен
     HOLD_DURATION: 1500,          // 1.5 секунды удержания
     VERSION: '4.0.0',
     MAX_RECONNECT_ATTEMPTS: 5,
@@ -20,3 +20,7 @@ const TEAMS = {
     RED: 'red',
     BLUE: 'blue'
 };
+
+
+
+
