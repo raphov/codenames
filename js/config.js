@@ -1,6 +1,6 @@
 // ==================== КОНФИГУРАЦИЯ ====================
 const CONFIG = {
-    RENDER_URL: 'obv913-2a09-bac1-61c0-20--57-235.ru.tuna.am',   // только домен, без https://
+    RENDER_URL: 'lrb56g-2a09-bac1-61c0-20--57-235.ru.tuna.am',   // только домен, без https://
     HOLD_DURATION: 1500,          // 1.5 секунды удержания
     VERSION: '4.0.0',
     MAX_RECONNECT_ATTEMPTS: 5,
