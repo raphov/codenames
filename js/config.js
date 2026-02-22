@@ -1,7 +1,7 @@
 // ==================== КОНФИГУРАЦИЯ ====================
 const CONFIG = {
     //RENDER_URL: 'codenames-u88n.onrender.com',
-    RENDER_URL: 'https://n9gmr3-45-143-236-205.ru.tuna.am',          // ваш URL от Tuna (без https://)
+    RENDER_URL: 'n9gmr3-45-143-236-205.ru.tuna.am',          // ваш URL от Tuna (без https://)
     HOLD_DURATION: 1200, 
     VERSION: '3.1.0',
     MAX_RECONNECT_ATTEMPTS: 5,
