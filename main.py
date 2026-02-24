@@ -80,11 +80,12 @@ async def websocket_handler(request):
                         if index is None:
                             continue
 
-                        if ws.role_type != 'agent':
-                            await ws.send_json({'type': 'error', 'message': 'Только агенты открывают карты'})
-                            continue
+                        # Можно разрешить открывать карты только агентам, если нужно
+                        # if ws.role_type != 'agent':
+                        #     await ws.send_json({'type': 'error', 'message': 'Только агенты открывают карты'})
+                        #     continue
 
-                        result = room.reveal_card(index, ws.team)
+                        result = room.reveal_card(index)  # больше не передаём команду
                         if 'error' in result:
                             await ws.send_json({'type': 'error', 'message': result['error']})
                         else:

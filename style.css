@@ -28,9 +28,10 @@ body.dark-theme {
     --text-primary: #ffffff;
     --text-secondary: #b0b8c5;
     --accent: #4f9eff;
-    --red-team: #ff3b3b;
-    --blue-team: #3b82f6;
-    --neutral: #9ca3af;
+    --red-team: #ff3b3b;           /* яркий красный */
+    --blue-team: #3b82f6;          /* яркий синий */
+    --neutral-unopened: #4a4f5e;   /* тёмно-серая рубашка */
+    --neutral-opened: #ffffff;     /* белый для открытых нейтральных */
     --black-card: #000000;
     --border-light: #333b4b;
 }
@@ -44,14 +45,15 @@ body.light-theme {
     --accent: #3182ce;
     --red-team: #dc2626;
     --blue-team: #2563eb;
-    --neutral: #f1f3f5;        /* изменено: почти белый */
+    --neutral-unopened: #e0e4e9;   /* светлая рубашка */
+    --neutral-opened: #f8f9fa;     /* почти белый */
     --black-card: #1f2937;
     --border-light: #cbd5e0;
 }
 
 /* ===== КОНТЕЙНЕР ===== */
 .container {
-    height: 100vh;              /* или можно использовать 100dvh для мобильных */
+    height: 100dvh; /* динамическая высота с учётом адресной строки на мобильных */
     display: flex;
     flex-direction: column;
     padding: 5px;
@@ -102,7 +104,7 @@ body.light-theme {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: #fbbf24;
+    background: #fbbf24; /* connecting */
     box-shadow: 0 0 6px currentColor;
 }
 
@@ -151,6 +153,7 @@ body.light-theme {
     padding: 8px 16px;
     border-radius: 30px;
     font-weight: 600;
+    display: none; /* скрываем индикатор хода, так как убрали логику ходов */
 }
 
 .turn-label {
@@ -168,11 +171,11 @@ body.light-theme {
 
 /* ===== ИГРОВОЕ ПОЛЕ ===== */
 .game-board-container {
-    flex: 1;                    /* занимает всё оставшееся пространство */
+    flex: 1; /* занимает всё оставшееся пространство */
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 0;              /* критично для сжатия в flex */
+    min-height: 0; /* критично для сжатия в flex */
     padding: 0;
     margin: 0;
 }
@@ -182,15 +185,15 @@ body.light-theme {
     grid-template-columns: repeat(5, 1fr);
     gap: 4px;
     width: 100%;
-    height: 100%;               /* занимает всю высоту родителя */
-    min-height: 0;              /* разрешает сжатие */
+    height: 100%; /* занимает всю высоту родителя */
+    min-height: 0; /* разрешает сжатие */
 }
 
 /* ===== КАРТОЧКИ ===== */
 .card {
-    aspect-ratio: 1/1;
+    aspect-ratio: 1/1; /* квадратные */
     width: 100%;
-    height: auto;               /* высота подстраивается под ширину */
+    height: auto; /* высота подстраивается под ширину */
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -199,76 +202,41 @@ body.light-theme {
     text-align: center;
     padding: 8px 4px;
     font-size: clamp(12px, 3vw, 20px);
-    color: white;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     transition: transform 0.2s, filter 0.3s, background 0.3s;
     position: relative;
     word-break: break-word;
     border: 2px solid transparent;
-    background: var(--card-bg);
     transform-style: preserve-3d;
     backface-visibility: visible;
 }
 
-/* ----- АГЕНТ: неоткрытые карты нейтральные (серые) ----- */
-.agent-view .card:not(.opened) {
-    background: var(--neutral);
+/* Неоткрытые карты (рубашка) — серые для всех */
+.card:not(.opened) {
+    background: var(--neutral-unopened);
     border: 2px solid var(--border-light);
     color: var(--text-primary);
 }
 
-/* ----- АГЕНТ: открытые карты — яркие цвета ----- */
-.agent-view .card.opened {
-    color: white;
+/* Открытые карты — цветные */
+.card.opened {
     border-color: #fff3;
     animation: flipIn 0.4s ease-out;
-}
-.agent-view .card.opened.red {
-    background: var(--red-team);
-}
-.agent-view .card.opened.blue {
-    background: var(--blue-team);
-}
-.agent-view .card.opened.black {
-    background: var(--black-card);
-}
-.agent-view .card.opened.neutral {
-    background: var(--neutral);
+    color: white; /* по умолчанию белый текст */
 }
 
-/* ----- КАПИТАН: неоткрытые карты — яркие цвета (без прозрачности) ----- */
-.captain-view .card:not(.opened).red {
-    background: var(--red-team);
-    color: white;
-}
-.captain-view .card:not(.opened).blue {
-    background: var(--blue-team);
-    color: white;
-}
-.captain-view .card:not(.opened).black {
-    background: var(--black-card);
-    color: white;
-}
-.captain-view .card:not(.opened).neutral {
-    background: var(--neutral);
-    color: white;
-}
-
-/* ----- КАПИТАН: открытые карты — блеклые ----- */
-.captain-view .card.opened {
-    filter: grayscale(0.5) brightness(0.7);
-}
-.captain-view .card.opened.red {
+.card.opened.red {
     background: var(--red-team);
 }
-.captain-view .card.opened.blue {
+.card.opened.blue {
     background: var(--blue-team);
 }
-.captain-view .card.opened.black {
+.card.opened.black {
     background: var(--black-card);
 }
-.captain-view .card.opened.neutral {
-    background: var(--neutral);
+.card.opened.neutral {
+    background: var(--neutral-opened);
+    color: var(--text-primary); /* тёмный текст на светлом фоне */
 }
 
 /* Анимация поворота */
@@ -350,32 +318,195 @@ body.light-theme {
 
 .fab:active { transform: scale(0.9); }
 
+/* ===== БУРГЕР-МЕНЮ ===== */
+.menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 200;
+    display: none;
+}
+
+.menu-content {
+    position: fixed;
+    bottom: 80px;
+    left: 20px;
+    right: 20px;
+    background: var(--bg-secondary);
+    border-radius: 24px;
+    padding: 20px;
+    z-index: 201;
+    display: none;
+    max-height: 70vh;
+    overflow-y: auto;
+    border: 1px solid var(--border-light);
+}
+
+.menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.menu-close {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.menu-section {
+    margin-bottom: 20px;
+}
+
+.menu-section h4 {
+    margin-bottom: 10px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.menu-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    text-align: left;
+    cursor: pointer;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.menu-btn i {
+    width: 20px;
+    color: var(--accent);
+}
+
+.menu-footer {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.bot-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ===== МОДАЛКИ ===== */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+    padding: 20px;
+}
+
+.modal.show { display: flex; }
+
+.modal-content {
+    background: var(--bg-secondary);
+    border-radius: 24px;
+    max-width: 400px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    border: 1px solid var(--border-light);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+/* ===== СТАТИСТИКА В МЕНЮ ===== */
+.game-stats {
+    display: flex;
+    gap: 15px;
+    justify-content: space-around;
+    padding: 10px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
 /* ===== АДАПТАЦИЯ ПОД ЛАНДШАФТ ===== */
 @media (orientation: landscape) {
-    /* Убедимся, что все flex-элементы правильно сжимаются */
-    .game-board-container {
-        flex: 1;
-        min-height: 0;
+    .simple-header, .scoreboard {
+        padding: 4px 8px;
+        margin-bottom: 4px;
+    }
+    .simple-header h1 {
+        font-size: 1.2rem;
+    }
+    .team-count {
+        font-size: 1.5rem;
     }
     .board {
-        height: 100%;
-        min-height: 0;
+        gap: 3px;
     }
     .card {
-        font-size: clamp(12px, 3.5vw, 18px);
+        font-size: clamp(10px, 2.5vw, 16px);
+        padding: 4px 2px;
     }
-    .scoreboard {
-        padding: 8px 12px;
+    .hold-hint {
+        font-size: 0.7rem;
+        padding: 4px;
     }
-    .team-count { font-size: 1.8rem; }
 }
 
 /* Для очень маленьких экранов */
 @media (max-width: 360px) {
     .card { font-size: 11px; }
+    .team-count { font-size: 1.5rem; }
+    .simple-header h1 { font-size: 1.2rem; }
 }
 
-/* Уведомления */
+/* ===== УВЕДОМЛЕНИЯ ===== */
 .notification {
     position: fixed;
     bottom: 100px;
@@ -389,8 +520,49 @@ body.light-theme {
     z-index: 1000;
     display: none;
     border: 1px solid var(--border-light);
+    white-space: nowrap;
+    max-width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
 .notification.show { display: block; }
 .notification.success { background: #10b981; color: white; }
 .notification.error { background: #ef4444; color: white; }
 .notification.info { background: var(--accent); color: white; }
+
+/* ===== ИГРОКИ (если понадобятся) ===== */
+.players-list {
+    margin-top: 10px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 10px;
+    border: 1px solid var(--border-light);
+}
+
+.player-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.player-item:last-child {
+    border-bottom: none;
+}
+
+.player-name {
+    font-weight: 500;
+}
+
+.player-role {
+    font-size: 0.9rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: var(--bg-secondary);
+}
+
+.player-role.captain {
+    background: var(--accent);
+    color: white;
+}
