@@ -51,11 +51,9 @@ var MobileManager = {
         for (var i = 0; i < cards.length; i++) {
             var card = cards[i];
             if (isLandscape) {
-                card.style.aspectRatio = '1/1';
                 card.style.fontSize = window.innerHeight < 600 ? '13px' : '16px';
                 card.style.padding = '4px';
             } else {
-                card.style.aspectRatio = '1/1';
                 card.style.fontSize = '14px';
                 card.style.padding = '6px';
             }
