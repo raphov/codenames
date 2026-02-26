@@ -174,18 +174,16 @@ body.light-theme {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     min-height: 0;
     padding: 0;
     margin: 0;
     height: 100%;
 }
 
-/* Грид-доска: 5x5, ячейки занимают всё доступное пространство */
 .board {
+    flex: 1; /* заставляет доску растягиваться на всю доступную высоту */
     display: grid;
     width: 100%;
-    height: 100%;
     min-height: 0;
     grid-template: repeat(5, 1fr) / repeat(5, 1fr);
     gap: 4px;
@@ -230,7 +228,7 @@ body.light-theme {
     background: var(--black-card);
 }
 .captain-view .card:not(.opened).neutral {
-    background: var(--neutral-unopened); /* можно оставить серым или изменить по желанию */
+    background: var(--neutral-unopened);
 }
 
 /* Открытые карты — цветные */
@@ -313,7 +311,6 @@ body.dark-theme .card.opened.neutral {
     transition: 0.2s;
 }
 
-/* Исправление для иконок Font Awesome, чтобы они корректно центрировались в flex */
 .fab i {
     display: block;
     line-height: 1;
@@ -505,7 +502,7 @@ body.dark-theme .card.opened.neutral {
         gap: 3px;
     }
     .card {
-        font-size: clamp(13px, 3vw, 18px); /* увеличен для ландшафта */
+        font-size: clamp(13px, 3vw, 18px);
         padding: 4px 2px;
     }
 }
