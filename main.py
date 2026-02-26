@@ -75,7 +75,8 @@ async def websocket_handler(request):
                         if index is None:
                             continue
 
-                        result = room.reveal_card(index)  # без команды
+                        result = room.reveal_card(index, ws.team)   # передаём команду игрока
+
                         if 'error' in result:
                             await ws.send_json({'type': 'error', 'message': result['error']})
                         else:

@@ -10,7 +10,7 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* убираем скроллы на уровне документа */
+    overflow: hidden;
 }
 
 body {
@@ -28,10 +28,10 @@ body.dark-theme {
     --text-primary: #ffffff;
     --text-secondary: #b0b8c5;
     --accent: #4f9eff;
-    --red-team: #ff3b3b;           /* яркий красный */
-    --blue-team: #3b82f6;          /* яркий синий */
-    --neutral-unopened: #4a4f5e;   /* тёмно-серая рубашка */
-    --neutral-opened: #ffffff;     /* белый для открытых нейтральных */
+    --red-team: #ff3b3b;
+    --blue-team: #3b82f6;
+    --neutral-unopened: #4a4f5e;
+    --neutral-opened: #ffffff;
     --black-card: #000000;
     --border-light: #333b4b;
 }
@@ -45,15 +45,15 @@ body.light-theme {
     --accent: #3182ce;
     --red-team: #dc2626;
     --blue-team: #2563eb;
-    --neutral-unopened: #e0e4e9;   /* светлая рубашка */
-    --neutral-opened: #f8f9fa;     /* почти белый */
+    --neutral-unopened: #e0e4e9;
+    --neutral-opened: #f8f9fa;
     --black-card: #1f2937;
     --border-light: #cbd5e0;
 }
 
 /* ===== КОНТЕЙНЕР ===== */
 .container {
-    height: 100dvh; /* динамическая высота с учётом адресной строки на мобильных */
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     padding: 5px;
@@ -104,7 +104,7 @@ body.light-theme {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: #fbbf24; /* connecting */
+    background: #fbbf24;
     box-shadow: 0 0 6px currentColor;
 }
 
@@ -153,7 +153,7 @@ body.light-theme {
     padding: 8px 16px;
     border-radius: 30px;
     font-weight: 600;
-    display: none; /* скрываем индикатор хода, так как убрали логику ходов */
+    display: none;
 }
 
 .turn-label {
@@ -171,29 +171,30 @@ body.light-theme {
 
 /* ===== ИГРОВОЕ ПОЛЕ ===== */
 .game-board-container {
-    flex: 1; /* занимает всё оставшееся пространство */
+    flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 0; /* критично для сжатия в flex */
+    min-height: 0;
     padding: 0;
     margin: 0;
+    height: 100%;
 }
 
+/* Грид-доска: 5x5, ячейки занимают всё доступное пространство */
 .board {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 4px;
     width: 100%;
-    height: 100%; /* занимает всю высоту родителя */
-    min-height: 0; /* разрешает сжатие */
+    height: 100%;
+    min-height: 0;
+    grid-template: repeat(5, 1fr) / repeat(5, 1fr);
+    gap: 4px;
 }
 
 /* ===== КАРТОЧКИ ===== */
 .card {
-    aspect-ratio: 1/1; /* квадратные */
     width: 100%;
-    height: auto; /* высота подстраивается под ширину */
+    height: 100%;
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -211,18 +212,32 @@ body.light-theme {
     backface-visibility: visible;
 }
 
-/* Неоткрытые карты (рубашка) — серые для всех */
+/* Неоткрытые карты (рубашка) — серые для всех (по умолчанию) */
 .card:not(.opened) {
     background: var(--neutral-unopened);
     border: 2px solid var(--border-light);
     color: var(--text-primary);
 }
 
+/* Капитан: неоткрытые карты цветные */
+.captain-view .card:not(.opened).red {
+    background: var(--red-team);
+}
+.captain-view .card:not(.opened).blue {
+    background: var(--blue-team);
+}
+.captain-view .card:not(.opened).black {
+    background: var(--black-card);
+}
+.captain-view .card:not(.opened).neutral {
+    background: var(--neutral-unopened); /* можно оставить серым или изменить по желанию */
+}
+
 /* Открытые карты — цветные */
 .card.opened {
     border-color: #fff3;
     animation: flipIn 0.4s ease-out;
-    color: white; /* по умолчанию белый текст */
+    color: white;
 }
 
 .card.opened.red {
@@ -236,7 +251,12 @@ body.light-theme {
 }
 .card.opened.neutral {
     background: var(--neutral-opened);
-    color: var(--text-primary); /* тёмный текст на светлом фоне */
+    color: #000; /* чёрный текст на белом фоне */
+}
+
+/* Для тёмной темы текст на открытых нейтральных картах тоже чёрный */
+body.dark-theme .card.opened.neutral {
+    color: #000;
 }
 
 /* Анимация поворота */
@@ -274,17 +294,6 @@ body.light-theme {
     border-radius: 0 0 12px 12px;
 }
 
-/* Подсказка удержания */
-.hold-hint {
-    text-align: center;
-    font-size: 0.8rem;
-    padding: 8px;
-    color: var(--text-secondary);
-    background: var(--bg-secondary);
-    border-radius: 20px;
-    margin-top: 6px;
-}
-
 /* ===== ПЛАВАЮЩИЕ КНОПКИ ===== */
 .fab {
     position: fixed;
@@ -302,6 +311,12 @@ body.light-theme {
     cursor: pointer;
     z-index: 100;
     transition: 0.2s;
+}
+
+/* Исправление для иконок Font Awesome, чтобы они корректно центрировались в flex */
+.fab i {
+    display: block;
+    line-height: 1;
 }
 
 .fullscreen-btn {
@@ -490,18 +505,14 @@ body.light-theme {
         gap: 3px;
     }
     .card {
-        font-size: clamp(10px, 2.5vw, 16px);
+        font-size: clamp(13px, 3vw, 18px); /* увеличен для ландшафта */
         padding: 4px 2px;
-    }
-    .hold-hint {
-        font-size: 0.7rem;
-        padding: 4px;
     }
 }
 
 /* Для очень маленьких экранов */
 @media (max-width: 360px) {
-    .card { font-size: 11px; }
+    .card { font-size: 12px; }
     .team-count { font-size: 1.5rem; }
     .simple-header h1 { font-size: 1.2rem; }
 }
@@ -530,39 +541,3 @@ body.light-theme {
 .notification.success { background: #10b981; color: white; }
 .notification.error { background: #ef4444; color: white; }
 .notification.info { background: var(--accent); color: white; }
-
-/* ===== ИГРОКИ (если понадобятся) ===== */
-.players-list {
-    margin-top: 10px;
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 10px;
-    border: 1px solid var(--border-light);
-}
-
-.player-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.player-item:last-child {
-    border-bottom: none;
-}
-
-.player-name {
-    font-weight: 500;
-}
-
-.player-role {
-    font-size: 0.9rem;
-    padding: 2px 8px;
-    border-radius: 12px;
-    background: var(--bg-secondary);
-}
-
-.player-role.captain {
-    background: var(--accent);
-    color: white;
-}

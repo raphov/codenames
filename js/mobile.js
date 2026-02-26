@@ -52,7 +52,7 @@ var MobileManager = {
             var card = cards[i];
             if (isLandscape) {
                 card.style.aspectRatio = '1/1';
-                card.style.fontSize = window.innerHeight < 600 ? '11px' : '14px';
+                card.style.fontSize = window.innerHeight < 600 ? '13px' : '16px';
                 card.style.padding = '4px';
             } else {
                 card.style.aspectRatio = '1/1';

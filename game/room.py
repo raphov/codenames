@@ -48,8 +48,8 @@ class GameRoom:
             'team': team,
         }
 
-    def reveal_card(self, index: int) -> Dict:
-        """Открывает карту и обновляет состояние"""
+    def reveal_card(self, index: int, team: str) -> Dict:
+        """team — команда, открывшая карту ('red' или 'blue')"""
         if not (0 <= index < 25):
             return {'error': 'Неверный индекс карты'}
         if self.game_state['revealed'][index]:
@@ -63,9 +63,19 @@ class GameRoom:
         elif color == 'blue':
             self.game_state['blue_score'] = max(0, self.game_state['blue_score'] - 1)
 
-        # Проверка победы
-        winner = self._check_winner(color)
-        game_over = winner is not None
+        # Определяем победителя
+        if color == 'black':
+            winner = 'blue' if team == 'red' else 'red'   # противоположная команда
+            game_over = True
+        elif self.game_state['red_score'] == 0:
+            winner = 'red'
+            game_over = True
+        elif self.game_state['blue_score'] == 0:
+            winner = 'blue'
+            game_over = True
+        else:
+            winner = None
+            game_over = False
 
         if game_over:
             self.game_state['game_status'] = 'finished'
