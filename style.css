@@ -113,7 +113,7 @@ body.light-theme {
 
 /* Контейнер игры (появляется после инициализации) */
 #gameArea {
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     flex: 1;                    /* занимает всё доступное место */
     min-height: 0;              /* разрешает сжатие */
