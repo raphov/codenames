@@ -1,7 +1,7 @@
 import json
 import random
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 active_rooms: Dict[str, 'GameRoom'] = {}
 
@@ -33,12 +33,12 @@ class GameRoom:
         except FileNotFoundError:
             return ["яблоко", "гора", "мост", "врач", "луна", "книга", "огонь", "река", "часы"]
 
-    def get_state_for_player(self, role: str, team: str) -> Dict:
-        """Возвращает состояние для игрока (роль больше не влияет на цвета карт)"""
+    def get_state(self, role: str, team: str) -> Dict:
+        """Возвращает состояние игры для игрока с указанной ролью и командой"""
         return {
             'room_id': self.room_id,
             'words': self.game_state['words'],
-            'colors': self.game_state['colors'],      # пока оставим, может пригодиться
+            'colors': self.game_state['colors'],      # все видят цвета
             'revealed': self.game_state['revealed'],
             'red_score': self.game_state['red_score'],
             'blue_score': self.game_state['blue_score'],
@@ -49,7 +49,7 @@ class GameRoom:
         }
 
     def reveal_card(self, index: int) -> Dict:
-        """Открывает карту без проверки очереди хода"""
+        """Открывает карту и обновляет состояние"""
         if not (0 <= index < 25):
             return {'error': 'Неверный индекс карты'}
         if self.game_state['revealed'][index]:
@@ -80,15 +80,9 @@ class GameRoom:
             'winner': winner,
         }
 
-    def _check_winner(self, last_color: str) -> str | None:
-        """Возвращает цвет победителя или None"""
+    def _check_winner(self, last_color: str) -> Optional[str]:
         if last_color == 'black':
-            # Команда, открывшая чёрную, проигрывает, побеждает противоположная
-            # Но так как ходов нет, просто фиксируем проигрыш открывшей команды?
-            # По логике, если чёрную открыл красный агент, проигрывают красные.
-            # У нас нет информации, кто открыл. Поэтому пока побеждает никто,
-            # просто игра заканчивается. Можно доработать позже.
-            return 'black'  # Специальное значение
+            return 'black'
         if self.game_state['red_score'] == 0:
             return 'red'
         if self.game_state['blue_score'] == 0:

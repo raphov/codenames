@@ -3,11 +3,9 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Загружаем .env до всех остальных импортов
 env_path = Path('.') / '.env'
 load_dotenv(dotenv_path=env_path)
 
-# Теперь можно импортировать модули, которые используют переменные окружения
 import json
 import logging
 import asyncio
@@ -62,11 +60,8 @@ async def websocket_handler(request):
     logger.info(f"✅ WebSocket подключен: комната {room_id}, роль={role_type}, команда={team}, всего={len(room.ws_connections)}")
 
     try:
-        if role_type == 'captain':
-            game_state = room.get_state_for_captain(team)
-        else:
-            game_state = room.get_state_for_agent(team)
-
+        # Используем единый метод get_state
+        game_state = room.get_state(role_type, team)
         await ws.send_json({'type': 'init', 'game_state': game_state})
 
         async for msg in ws:
@@ -80,12 +75,7 @@ async def websocket_handler(request):
                         if index is None:
                             continue
 
-                        # Можно разрешить открывать карты только агентам, если нужно
-                        # if ws.role_type != 'agent':
-                        #     await ws.send_json({'type': 'error', 'message': 'Только агенты открывают карты'})
-                        #     continue
-
-                        result = room.reveal_card(index)  # больше не передаём команду
+                        result = room.reveal_card(index)  # без команды
                         if 'error' in result:
                             await ws.send_json({'type': 'error', 'message': result['error']})
                         else:
@@ -109,10 +99,7 @@ async def websocket_handler(request):
                         for conn in room.ws_connections:
                             if conn.closed:
                                 continue
-                            if conn.role_type == 'captain':
-                                state = room.get_state_for_captain(conn.team)
-                            else:
-                                state = room.get_state_for_agent(conn.team)
+                            state = room.get_state(conn.role_type, conn.team)
                             await conn.send_json({'type': 'game_reset', 'game_state': state})
 
                     elif action == 'ping':
