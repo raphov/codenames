@@ -111,6 +111,15 @@ body.light-theme {
 .status-dot.connected { background: #10b981; }
 .status-dot.error { background: #ef4444; }
 
+/* Контейнер игры (появляется после инициализации) */
+#gameArea {
+    display: flex;
+    flex-direction: column;
+    flex: 1;                    /* занимает всё доступное место */
+    min-height: 0;              /* разрешает сжатие */
+    height: 100%;               /* запасной вариант */
+}
+
 /* ===== СЧЁТЧИКИ ===== */
 .scoreboard {
     flex-shrink: 0;
@@ -231,7 +240,15 @@ body.light-theme {
 .captain-view .card:not(.opened).neutral {
     background: var(--neutral-unopened);
 }
+/* Капитан: открытые карты с пониженной насыщенностью */
+.captain-view .card.opened {
+    filter: grayscale(0.5) brightness(0.7) !important;
+}
 
+/* Агент: открытые карты без фильтра (оставляем яркими) */
+.agent-view .card.opened {
+    filter: none !important;
+}
 /* Открытые карты — цветные */
 .card.opened {
     border-color: #fff3;
@@ -251,6 +268,12 @@ body.light-theme {
 .card.opened.neutral {
     background: var(--neutral-opened);
     color: #000; /* чёрный текст на белом фоне */
+}
+/* Открытые цветные карты всегда с белым текстом */
+.card.opened.red,
+.card.opened.blue,
+.card.opened.black {
+    color: #ffffff !important;
 }
 
 /* Для тёмной темы текст на открытых нейтральных картах тоже чёрный */
