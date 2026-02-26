@@ -1,6 +1,6 @@
 // ==================== КОНФИГУРАЦИЯ ====================
 const CONFIG = {
-    RENDER_URL: '2hi8ig-45-143-236-205.ru.tuna.am',   // только домен, без https://
+    RENDER_URL: '8ehdjz-45-143-236-205.ru.tuna.am',   // только домен, без https://
     HOLD_DURATION: 1500,          // 1.5 секунды удержания
     VERSION: '4.0.0',
     MAX_RECONNECT_ATTEMPTS: 5,
