@@ -9,6 +9,7 @@ load_dotenv(dotenv_path=env_path)
 import json
 import logging
 import asyncio
+import aiohttp
 from datetime import datetime
 from aiohttp import web
 from telegram import Update
@@ -16,7 +17,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 
 from game.room import GameRoom, active_rooms
 from handlers.commands import start_command, new_command, help_command, unknown_command
-from utils.config import BOT_TOKEN, RENDER_URL
+from utils.config import BOT_TOKEN, RENDER_URL, GEMINI_API_KEY
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -28,7 +29,97 @@ if not BOT_TOKEN:
     logger.critical("❌ BOT_TOKEN не задан!")
     raise ValueError("BOT_TOKEN обязателен")
 
+
+# ==================== GEMINI AI ====================
+
+async def generate_ai_hint(hint_data: dict) -> dict:
+    """Запрос к Gemini 1.5 Flash для генерации подсказки капитана"""
+    if not GEMINI_API_KEY:
+        return {'error': 'GEMINI_API_KEY не задан в .env'}
+
+    my_words    = hint_data['my_words']
+    enemy_words = hint_data['enemy_words']
+    neutral     = hint_data['neutral_words']
+    black       = hint_data['black_words']
+    team_ru     = 'Красных' if hint_data['team'] == 'red' else 'Синих'
+
+    prompt = f"""Ты — опытный капитан в игре «Кодовые слова» (Codenames), команда {team_ru}.
+
+Твои слова (нужно чтобы агенты угадали): {my_words}
+Слова врага (угадают — очко врагу): {enemy_words}
+Нейтральные слова (угадают — просто теряют ход): {neutral}
+Чёрное слово (угадают — мгновенный проигрыш!): {black}
+
+Задача: придумай одно слово-подсказку, которое:
+1. Связывает как можно больше ТВОИХ слов по смыслу, ассоциации или теме
+2. НЕ подходит к чёрному слову
+3. Минимально подходит к словам врага
+4. Само слово не должно быть однокоренным ни с одним словом на поле
+
+Верни ТОЛЬКО валидный JSON без markdown-обёртки (без ```json), строго такой формат:
+{{
+  "hint": "ПОДСКАЗКА",
+  "count": 3,
+  "targets": ["СЛОВО1", "СЛОВО2", "СЛОВО3"],
+  "reasoning": "Краткое объяснение связи (1-2 предложения)",
+  "risk": "Какие слова могут смутить агентов и почему",
+  "alternatives": [
+    {{"hint": "ПОДСКАЗКА2", "count": 2, "targets": ["СЛОВО1", "СЛОВО2"], "safety": "high"}},
+    {{"hint": "ПОДСКАЗКА3", "count": 2, "targets": ["СЛОВО1", "СЛОВО2"], "safety": "medium"}}
+  ]
+}}
+
+Значения safety: "high" (риск минимален), "medium" (небольшой риск), "low" (рискованно).
+Пиши все слова ЗАГЛАВНЫМИ буквами.
+"""
+
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/"
+        f"gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+    )
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "temperature": 0.7,
+            "maxOutputTokens": 600,
+        }
+    }
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, json=payload, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                if resp.status != 200:
+                    text = await resp.text()
+                    logger.error(f"❌ Gemini API error {resp.status}: {text}")
+                    return {'error': f'Gemini вернул статус {resp.status}'}
+
+                data = await resp.json()
+                raw_text = data['candidates'][0]['content']['parts'][0]['text']
+
+                # Убираем возможные markdown-обёртки (```json ... ```)
+                clean = raw_text.strip()
+                if clean.startswith('```'):
+                    clean = clean.split('\n', 1)[-1]
+                if clean.endswith('```'):
+                    clean = clean.rsplit('```', 1)[0]
+                clean = clean.strip()
+
+                result = json.loads(clean)
+                logger.info(f"✅ Gemini hint: {result.get('hint')} x{result.get('count')}")
+                return result
+
+    except json.JSONDecodeError as e:
+        logger.error(f"❌ Gemini JSON parse error: {e}\nRaw: {raw_text}")
+        return {'error': 'ИИ вернул некорректный ответ, попробуйте ещё раз'}
+    except asyncio.TimeoutError:
+        return {'error': 'Gemini не ответил за 15 секунд, попробуйте ещё раз'}
+    except Exception as e:
+        logger.exception(f"❌ generate_ai_hint exception: {e}")
+        return {'error': 'Ошибка при обращении к ИИ'}
+
+
 # ==================== WEBSOCKET ====================
+
 async def websocket_handler(request):
     ws = web.WebSocketResponse(autoping=True, heartbeat=30)
     await ws.prepare(request)
@@ -53,14 +144,12 @@ async def websocket_handler(request):
         return ws
 
     room = active_rooms[room_id]
-
     ws.role_type = role_type
     ws.team = team
     room.ws_connections.append(ws)
-    logger.info(f"✅ WebSocket подключен: комната {room_id}, роль={role_type}, команда={team}, всего={len(room.ws_connections)}")
+    logger.info(f"✅ WS подключён: {room_id} role={role_type} team={team} total={len(room.ws_connections)}")
 
     try:
-        # Используем единый метод get_state
         game_state = room.get_state(role_type, team)
         await ws.send_json({'type': 'init', 'game_state': game_state})
 
@@ -70,31 +159,39 @@ async def websocket_handler(request):
                     data = json.loads(msg.data)
                     action = data.get('action')
 
+                    # ── Открыть карту ──────────────────────────────────────
                     if action == 'click_card':
                         index = data.get('index')
                         if index is None:
                             continue
 
-                        result = room.reveal_card(index, ws.team)   # передаём команду игрока
+                        result = room.reveal_card(index, ws.team)
 
                         if 'error' in result:
                             await ws.send_json({'type': 'error', 'message': result['error']})
                         else:
-                            update_msg = {
+                            await broadcast_to_room(room_id, {
                                 'type': 'card_revealed',
                                 'index': result['index'],
                                 'color': result['color'],
                                 'red_score': result['red_score'],
-                                'blue_score': result['blue_score']
-                            }
-                            await broadcast_to_room(room_id, update_msg)
+                                'blue_score': result['blue_score'],
+                            })
+
+                            # ФИКС: отправляем turn_switch если ход переключился
+                            if result.get('turn_switched'):
+                                await broadcast_to_room(room_id, {
+                                    'type': 'turn_switch',
+                                    'current_team': result['current_team'],
+                                })
 
                             if result['game_over']:
                                 await broadcast_to_room(room_id, {
                                     'type': 'game_over',
-                                    'winner': result['winner']
+                                    'winner': result['winner'],
                                 })
 
+                    # ── Сброс игры ─────────────────────────────────────────
                     elif action == 'reset_game':
                         room.reset_game()
                         for conn in room.ws_connections:
@@ -103,6 +200,34 @@ async def websocket_handler(request):
                             state = room.get_state(conn.role_type, conn.team)
                             await conn.send_json({'type': 'game_reset', 'game_state': state})
 
+                    # ── ИИ-подсказка (только капитан) ──────────────────────
+                    elif action == 'get_ai_hint':
+                        if ws.role_type != 'captain':
+                            await ws.send_json({
+                                'type': 'error',
+                                'message': 'ИИ-подсказки доступны только капитану'
+                            })
+                            continue
+
+                        if room.game_state['game_status'] != 'active':
+                            await ws.send_json({
+                                'type': 'error',
+                                'message': 'Игра уже завершена'
+                            })
+                            continue
+
+                        # Сообщаем капитану что думаем
+                        await ws.send_json({'type': 'ai_hint_loading'})
+
+                        hint_data = room.get_ai_hint_data(ws.team)
+                        hint = await generate_ai_hint(hint_data)
+
+                        if 'error' in hint:
+                            await ws.send_json({'type': 'error', 'message': hint['error']})
+                        else:
+                            await ws.send_json({'type': 'ai_hint', 'hint': hint})
+
+                    # ── Пинг ───────────────────────────────────────────────
                     elif action == 'ping':
                         await ws.send_json({'type': 'pong'})
 
@@ -119,7 +244,7 @@ async def websocket_handler(request):
     finally:
         if ws in room.ws_connections:
             room.ws_connections.remove(ws)
-            logger.info(f"🔌 WebSocket отключен: комната {room_id}, осталось={len(room.ws_connections)}")
+            logger.info(f"🔌 WS отключён: {room_id} осталось={len(room.ws_connections)}")
 
     return ws
 
@@ -132,11 +257,12 @@ async def broadcast_to_room(room_id: str, message: dict):
         if not conn.closed:
             try:
                 await conn.send_json(message)
-            except:
+            except Exception:
                 pass
 
 
 # ==================== HTTP ====================
+
 async def telegram_webhook(request):
     try:
         data = await request.json()
@@ -159,16 +285,15 @@ async def health_check(request):
 
 
 async def cors_handler(request):
-    return web.Response(
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
-        }
-    )
+    return web.Response(headers={
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+    })
 
 
 # ==================== ОЧИСТКА ====================
+
 async def cleanup_old_rooms():
     while True:
         await asyncio.sleep(300)
@@ -184,6 +309,7 @@ async def cleanup_old_rooms():
 
 
 # ==================== ЗАПУСК ====================
+
 application = Application.builder().token(BOT_TOKEN).build()
 
 
@@ -216,8 +342,6 @@ async def main():
     asyncio.create_task(cleanup_old_rooms())
 
     logger.info(f"🚀 Сервер запущен на порту {port}")
-    logger.info(f"🔌 WebSocket endpoint: ws://.../ws?room=XXX&role=XXX")
-
     await asyncio.Future()
 
 

@@ -1,16 +1,16 @@
 // ==================== ГЛАВНЫЙ ФАЙЛ ====================
 
-var roomId = null;
-var role = null;        // полная строка роли
-var roleType = null;    // 'captain' или 'agent'
-var team = null;        // 'red' или 'blue'
+var roomId   = null;
+var role     = null;
+var roleType = null;
+var team     = null;
 
 function initApp() {
     console.log('🎮 Codenames Online v' + CONFIG.VERSION);
 
     var params = getUrlParams();
     roomId = params.roomId;
-    role = params.role;
+    role   = params.role;
 
     if (!roomId || !role) {
         UI.showError(
@@ -23,12 +23,10 @@ function initApp() {
 
     var parsed = parseRole(role);
     roleType = parsed.type;
-    team = parsed.team;
+    team     = parsed.team;
 
-    // Добавляем класс роли на body для стилизации
     document.body.classList.add(roleType + '-view');
-
-    console.log('📦 Комната:', roomId, 'Роль:', roleType, 'Команда:', team);
+    console.log('📦 Комната:', roomId, '| Роль:', roleType, '| Команда:', team);
 
     localStorage.setItem('last_room', roomId);
     localStorage.setItem('last_role', role);
@@ -46,20 +44,20 @@ function initApp() {
 
 function setupWebSocketHandlers() {
     wsManager.on('connected', function() {
-        UI.updateConnectionStatus('✅ Подключено', 'connected');
+        UI.updateConnectionStatus('connected');   // ФИКС: только тип, не текст
         showNotification('Соединение установлено', 'success');
     });
 
     wsManager.on('disconnected', function() {
-        UI.updateConnectionStatus('❌ Соединение прервано', 'error');
+        UI.updateConnectionStatus('error');
     });
 
     wsManager.on('reconnecting', function(data) {
-        UI.updateConnectionStatus('🔄 Переподключение (' + data.attempt + '/' + CONFIG.MAX_RECONNECT_ATTEMPTS + ')', 'connecting');
+        UI.updateConnectionStatus('connecting');
     });
 
     wsManager.on('reconnect_failed', function() {
-        UI.updateConnectionStatus('❌ Не удалось подключиться. Обновите страницу.', 'error');
+        UI.updateConnectionStatus('error');
         showNotification('Не удалось подключиться к серверу', 'error');
     });
 
@@ -69,8 +67,15 @@ function setupWebSocketHandlers() {
         UI.elements.gameArea.style.display = 'block';
 
         if (UI.elements.roomDisplay) {
-            var roleText = (roleType === 'captain') ? '👑 Капитан ' + (team === 'red' ? 'красных' : 'синих') : '🔎 Агент ' + (team === 'red' ? 'красных' : 'синих');
-            UI.elements.roomDisplay.textContent = roomId + ' - ' + roleText;
+            var roleText = roleType === 'captain'
+                ? '👑 Капитан ' + (team === 'red' ? 'красных' : 'синих')
+                : '🔎 Агент '   + (team === 'red' ? 'красных' : 'синих');
+            UI.elements.roomDisplay.textContent = roomId + ' — ' + roleText;
+        }
+
+        // Показываем ИИ-панель только капитанам
+        if (roleType === 'captain') {
+            UI.showAIPanel();
         }
     });
 
@@ -101,6 +106,18 @@ function setupWebSocketHandlers() {
         gameManager.currentMove = 1;
         showNotification('🔄 Новая игра началась!', 'success');
     });
+
+    // ── ИИ-подсказки ──────────────────────────────────────────────────
+
+    wsManager.on('ai_hint_loading', function() {
+        UI.setAIHintLoading();
+    });
+
+    wsManager.on('ai_hint', function(data) {
+        UI.renderAIHint(data.hint);
+    });
+
+    // ── Ошибки ────────────────────────────────────────────────────────
 
     wsManager.on('error', function(data) {
         showNotification(data.message || 'Ошибка сервера', 'error');

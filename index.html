@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Codenames Online</title>
-    <link rel="stylesheet" href="style.css?v=4.1.2">
+    <link rel="stylesheet" href="style.css?v=4.2.4">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -37,6 +37,22 @@
             <div class="game-board-container">
                 <div class="board" id="gameBoard"></div>
                 <div class="hold-hint" id="holdHint"><i class="fas fa-hand-point-up"></i> Удерживайте 2с</div>
+            </div>
+
+            <!-- ИИ-панель: видна только капитанам (показывается из main.js) -->
+            <div id="aiHintPanel" class="ai-hint-panel" style="display:none;">
+                <div class="ai-hint-header">
+                    <span class="ai-hint-title">
+                        <i class="fas fa-robot"></i> ИИ-капитан
+                        <span class="ai-badge">Gemini</span>
+                    </span>
+                    <button id="aiHintBtn" class="ai-hint-btn" onclick="wsManager.send({action:'get_ai_hint'})">
+                        <i class="fas fa-robot"></i> Спросить ИИ
+                    </button>
+                </div>
+                <div id="aiHintContent" class="ai-hint-content">
+                    <span class="ai-hint-placeholder">Нажмите кнопку, чтобы получить подсказку</span>
+                </div>
             </div>
         </div>
 
@@ -81,13 +97,13 @@
         <div id="notification" class="notification"></div>
     </div>
 
-    <script src="js/config.js?v=4.1.2"></script>
-    <script src="js/utils.js?v=4.1.2"></script>
-    <script src="js/websocket.js?v=4.1.2"></script>
-    <script src="js/game.js?v=4.1.2"></script>
-    <script src="js/ui.js?v=4.1.2"></script>
-    <script src="js/mobile.js?v=4.1.2"></script>
-    <script src="js/events.js?v=4.1.2"></script>
-    <script src="js/main.js?v=4.1.2"></script>
+    <script src="js/config.js?v=4.2.4"></script>
+    <script src="js/utils.js?v=4.2.4"></script>
+    <script src="js/websocket.js?v=4.2.4"></script>
+    <script src="js/game.js?v=4.2.4"></script>
+    <script src="js/ui.js?v=4.2.4"></script>
+    <script src="js/mobile.js?v=4.2.4"></script>
+    <script src="js/events.js?v=4.2.4"></script>
+    <script src="js/main.js?v=4.2.4"></script>
 </body>
 </html>
