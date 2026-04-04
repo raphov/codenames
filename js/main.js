@@ -37,14 +37,13 @@ function initApp() {
 
     mobileManager.init();
     eventManager.init();
-
     setupWebSocketHandlers();
     wsManager.connect(roomId, role);
 }
 
 function setupWebSocketHandlers() {
     wsManager.on('connected', function() {
-        UI.updateConnectionStatus('connected');   // ФИКС: только тип, не текст
+        UI.updateConnectionStatus('connected');
         showNotification('Соединение установлено', 'success');
     });
 
@@ -52,7 +51,7 @@ function setupWebSocketHandlers() {
         UI.updateConnectionStatus('error');
     });
 
-    wsManager.on('reconnecting', function(data) {
+    wsManager.on('reconnecting', function() {
         UI.updateConnectionStatus('connecting');
     });
 
@@ -68,12 +67,11 @@ function setupWebSocketHandlers() {
 
         if (UI.elements.roomDisplay) {
             var roleText = roleType === 'captain'
-                ? '👑 Капитан ' + (team === 'red' ? 'красных' : 'синих')
-                : '🔎 Агент '   + (team === 'red' ? 'красных' : 'синих');
+                ? '👑 ' + (team === 'red' ? 'Красный капитан' : 'Синий капитан')
+                : '🔎 ' + (team === 'red' ? 'Красный агент'   : 'Синий агент');
             UI.elements.roomDisplay.textContent = roomId + ' — ' + roleText;
         }
 
-        // Показываем ИИ-панель только капитанам
         if (roleType === 'captain') {
             UI.showAIPanel();
         }
@@ -88,11 +86,10 @@ function setupWebSocketHandlers() {
         gameManager.updateCard(data.index, data.color, data.red_score, data.blue_score);
     });
 
+    // turn_switch — просто обновляем состояние без уведомления (логику хода убрали)
     wsManager.on('turn_switch', function(data) {
         if (gameManager.gameState) {
             gameManager.gameState.current_team = data.current_team;
-            gameManager.updateGameInfo(gameManager.gameState);
-            showNotification('Ход переходит к ' + TEAM_NAMES[data.current_team], 'info');
         }
     });
 
@@ -107,8 +104,6 @@ function setupWebSocketHandlers() {
         showNotification('🔄 Новая игра началась!', 'success');
     });
 
-    // ── ИИ-подсказки ──────────────────────────────────────────────────
-
     wsManager.on('ai_hint_loading', function() {
         UI.setAIHintLoading();
     });
@@ -117,10 +112,14 @@ function setupWebSocketHandlers() {
         UI.renderAIHint(data.hint);
     });
 
-    // ── Ошибки ────────────────────────────────────────────────────────
-
     wsManager.on('error', function(data) {
         showNotification(data.message || 'Ошибка сервера', 'error');
+        // Если ошибка пришла во время загрузки ИИ — сбрасываем кнопку
+        var btn = UI.elements.aiHintBtn;
+        if (btn && btn.disabled) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-robot"></i> Спросить';
+        }
     });
 }
 

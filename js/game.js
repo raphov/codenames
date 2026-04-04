@@ -18,18 +18,12 @@ var GameManager = {
         board.innerHTML = '';
         this._clearHoldTimers();
 
-        // ФИКС: класс captain-view / agent-view ставим на board,
-        // чтобы CSS-селекторы типа .captain-view .card работали корректно
         board.classList.remove('captain-view', 'agent-view');
         board.classList.add(gameState.role === ROLES.CAPTAIN ? 'captain-view' : 'agent-view');
 
-        var words = gameState.words;
-        for (var i = 0; i < words.length; i++) {
-            var card = this._createCard(words[i], i, gameState);
-            board.appendChild(card);
+        for (var i = 0; i < gameState.words.length; i++) {
+            board.appendChild(this._createCard(gameState.words[i], i, gameState));
         }
-
-        console.log('🎮 Поле отрисовано, ' + words.length + ' карточек');
     },
 
     _createCard: function(word, index, gameState) {
@@ -39,19 +33,15 @@ var GameManager = {
         card.dataset.index = index;
 
         var isCaptain = (gameState.role === ROLES.CAPTAIN);
-        var color     = gameState.colors && gameState.colors[index];
-        var revealed  = gameState.revealed[index];
+        var color    = gameState.colors && gameState.colors[index];
+        var revealed = gameState.revealed[index];
 
         if (revealed) {
-            // Открытая карта — цвет видят все
             card.classList.add('opened');
             if (color) card.classList.add(color);
         } else if (isCaptain) {
-            // Капитан: не открытые карты имеют цвет команды
-            // Класс captain-view уже на board — CSS сам окрасит
             if (color) card.classList.add(color);
         } else {
-            // Агент: карты закрыты, вешаем hold-события
             this._setupHoldEvents(card, index);
         }
 
@@ -77,7 +67,6 @@ var GameManager = {
             }
             e.preventDefault();
             self._clearHoldTimer(index);
-
             card.classList.add('holding');
             isHolding = true;
             holdProgress = 0;
@@ -105,7 +94,7 @@ var GameManager = {
             if (progressInterval) { clearInterval(progressInterval); progressInterval = null; }
             card.classList.remove('holding');
             progressBar.style.width = '0%';
-            if (isHolding) showNotification('Удерживайте ' + (CONFIG.HOLD_DURATION / 1000) + ' сек для выбора', 'info', 1000);
+            if (isHolding) showNotification('Удерживайте дольше для выбора', 'info', 1000);
             isHolding = false;
         };
 
@@ -133,16 +122,13 @@ var GameManager = {
         var card = cards[index];
         card.classList.add('opened', color);
 
-        // Убираем прогресс-бар и события
         var progress = card.querySelector('.hold-progress');
         if (progress) progress.remove();
 
-        // Обновляем локальное состояние
         if (this.gameState && this.gameState.revealed) {
             this.gameState.revealed[index] = true;
         }
 
-        // Счётчики
         var redCount  = document.getElementById('redCount');
         var blueCount = document.getElementById('blueCount');
         if (redCount  && redScore  !== undefined) redCount.textContent  = redScore;
@@ -155,27 +141,16 @@ var GameManager = {
     updateGameInfo: function(gameState) {
         this.gameState = gameState;
 
-        var redCount   = document.getElementById('redCount');
-        var blueCount  = document.getElementById('blueCount');
-        var currentTurn = document.getElementById('currentTurn');
-
+        var redCount  = document.getElementById('redCount');
+        var blueCount = document.getElementById('blueCount');
         if (redCount)  redCount.textContent  = gameState.red_score  || 0;
         if (blueCount) blueCount.textContent = gameState.blue_score || 0;
-
-        if (currentTurn && gameState.current_team) {
-            var teamName  = TEAM_NAMES[gameState.current_team] || 'Красные';
-            var teamClass = gameState.current_team;
-            currentTurn.style.display = 'block';
-            currentTurn.innerHTML =
-                '<div class="turn-label">Сейчас ходят:</div>' +
-                '<div class="turn-team ' + teamClass + '">' + teamName + '</div>';
-        }
 
         this._updateStats();
     },
 
     _updateStats: function() {
-        var openedCards  = document.getElementById('openedCards');
+        var openedCards   = document.getElementById('openedCards');
         var currentMoveEl = document.getElementById('currentMove');
 
         if (openedCards && this.gameState && this.gameState.revealed) {
@@ -207,18 +182,16 @@ var GameManager = {
         var modal = document.createElement('div');
         modal.className = 'modal show';
         modal.innerHTML =
-            '<div class="modal-content" style="max-width:500px;">' +
-            '<div class="modal-header">' +
-            '<h3>🏆 Игра окончена!</h3>' +
-            '<button class="modal-close">&times;</button>' +
-            '</div>' +
+            '<div class="modal-content" style="max-width:400px;">' +
+            '<div class="modal-header"><h3>🏆 Игра окончена!</h3>' +
+            '<button class="modal-close">&times;</button></div>' +
             '<div class="modal-body" style="text-align:center;">' +
-            '<div style="font-size:2rem;color:' + winnerColor + ';margin:20px 0;">' +
+            '<div style="font-size:2rem;color:' + winnerColor + ';margin:16px 0;">' +
             '<i class="fas fa-crown"></i> Победили ' + winnerName + '</div>' +
-            '<p style="color:#94a3b8;">' + (reason || 'Поздравляем!') + '</p>' +
-            '<div style="display:flex;gap:15px;justify-content:center;margin-top:30px;">' +
-            '<button class="btn-primary" onclick="location.reload()">🔄 Новая игра</button>' +
-            '<button class="btn-secondary" id="shareResultsBtn">📋 Поделиться</button>' +
+            '<p style="color:var(--text-secondary);">' + (reason || '') + '</p>' +
+            '<div style="display:flex;gap:12px;justify-content:center;margin-top:24px;">' +
+            '<button onclick="wsManager.send({action:\'reset_game\'})" style="padding:10px 18px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:0.95rem;cursor:pointer;">🔄 Новая игра</button>' +
+            '<button id="shareResultsBtn" style="padding:10px 18px;background:var(--card-bg);color:var(--text-primary);border:1px solid var(--border-light);border-radius:10px;font-size:0.95rem;cursor:pointer;">📋 Поделиться</button>' +
             '</div></div></div>';
 
         document.body.appendChild(modal);
@@ -229,11 +202,9 @@ var GameManager = {
         var shareBtn = modal.querySelector('#shareResultsBtn');
         if (shareBtn) {
             shareBtn.onclick = function() {
-                var text = '🎮 Codenames — победили ' + winnerName + '!\nКомната: ' +
-                    (gameManager.gameState ? gameManager.gameState.room_id : '') +
-                    '\n' + window.location.href;
+                var text = '🎮 Codenames — победили ' + winnerName + '!\n' + window.location.href;
                 copyToClipboard(text);
-                showNotification('✅ Результаты скопированы!', 'success');
+                showNotification('✅ Скопировано!', 'success');
             };
         }
     }

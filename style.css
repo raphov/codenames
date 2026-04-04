@@ -31,13 +31,13 @@ body.dark-theme {
     --red-team: #ff3b3b;
     --blue-team: #3b82f6;
     --neutral-unopened: #4a4f5e;
-    --neutral-opened: #ffffff;
-    --black-card: #000000;
+    --neutral-opened: #e8eaf0;
+    --black-card: #111318;
     --border-light: #333b4b;
 }
 
 body.light-theme {
-    --bg-primary: #f5f7fa;
+    --bg-primary: #f0f2f7;
     --bg-secondary: #e4e9f2;
     --card-bg: #ffffff;
     --text-primary: #1a2639;
@@ -45,10 +45,10 @@ body.light-theme {
     --accent: #3182ce;
     --red-team: #dc2626;
     --blue-team: #2563eb;
-    --neutral-unopened: #e0e4e9;
-    --neutral-opened: #f8f9fa;
+    --neutral-unopened: #d0d5e0;
+    --neutral-opened: #f0f2f7;
     --black-card: #1f2937;
-    --border-light: #cbd5e0;
+    --border-light: #c8d0de;
 }
 
 /* ===== КОНТЕЙНЕР ===== */
@@ -66,29 +66,31 @@ body.light-theme {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 12px;
+    padding: 6px 10px 6px 12px;
     background: var(--bg-secondary);
     border-radius: 12px;
-    margin-bottom: 8px;
-    font-size: 0.9rem;
+    margin-bottom: 6px;
 }
 
 .simple-header h1 {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     color: var(--accent);
     display: flex;
     align-items: center;
     gap: 6px;
+    white-space: nowrap;
 }
 
-.simple-header h1 i {
-    font-size: 1.2rem;
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .room-tag {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .room-tag code {
@@ -97,51 +99,69 @@ body.light-theme {
     border-radius: 20px;
     font-family: 'JetBrains Mono', monospace;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-primary);
 }
 
 .status-dot {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: #fbbf24;
-    box-shadow: 0 0 6px currentColor;
+    flex-shrink: 0;
 }
 
 .status-dot.connected { background: #10b981; }
-.status-dot.error { background: #ef4444; }
+.status-dot.error     { background: #ef4444; }
 
-/* Контейнер игры (появляется после инициализации) */
+/* Бургер в шапке */
+.header-burger {
+    background: var(--card-bg);
+    border: 1px solid var(--border-light);
+    color: var(--text-primary);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    flex-shrink: 0;
+}
+
+.header-burger:active { background: var(--border-light); }
+
+/* ===== ИГРОВАЯ ЗОНА ===== */
 #gameArea {
     display: flex !important;
     flex-direction: column;
-    flex: 1;                    /* занимает всё доступное место */
-    min-height: 0;              /* разрешает сжатие */
-    height: 100%;               /* запасной вариант */
+    flex: 1;
+    min-height: 0;
 }
 
 /* ===== СЧЁТЧИКИ ===== */
 .scoreboard {
     flex-shrink: 0;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     align-items: center;
     background: var(--bg-secondary);
-    padding: 12px 16px;
-    border-radius: 16px;
-    margin-bottom: 10px;
+    padding: 8px 16px;
+    border-radius: 14px;
+    margin-bottom: 6px;
 }
 
 .team-score {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 80px;
 }
 
 .team-label {
-    font-size: 0.8rem;
-    opacity: 0.8;
+    font-size: 0.75rem;
+    opacity: 0.75;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -153,30 +173,8 @@ body.light-theme {
     line-height: 1.2;
 }
 
-.team-score.red .team-count { color: var(--red-team); }
+.team-score.red  .team-count { color: var(--red-team); }
 .team-score.blue .team-count { color: var(--blue-team); }
-
-.turn-indicator {
-    text-align: center;
-    background: var(--card-bg);
-    padding: 8px 16px;
-    border-radius: 30px;
-    font-weight: 600;
-    display: none;
-}
-
-.turn-label {
-    font-size: 0.7rem;
-    opacity: 0.7;
-}
-
-.turn-team {
-    font-size: 1rem;
-    font-weight: 700;
-}
-
-.turn-team.red { color: var(--red-team); }
-.turn-team.blue { color: var(--blue-team); }
 
 /* ===== ИГРОВОЕ ПОЛЕ ===== */
 .game-board-container {
@@ -184,13 +182,10 @@ body.light-theme {
     display: flex;
     flex-direction: column;
     min-height: 0;
-    padding: 0;
-    margin: 0;
-    height: 100%;
 }
 
 .board {
-    flex: 1; /* заставляет доску растягиваться на всю доступную высоту */
+    flex: 1;
     display: grid;
     width: 100%;
     height: 100%;
@@ -203,107 +198,70 @@ body.light-theme {
 .card {
     width: 100%;
     height: 100%;
-    border-radius: 12px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
     text-align: center;
-    padding: 8px 4px;
-    font-size: clamp(12px, 3vw, 20px);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    transition: transform 0.2s, filter 0.3s, background 0.3s;
+    padding: 6px 4px;
+    font-size: clamp(11px, 2.8vw, 18px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    transition: transform 0.15s, filter 0.3s;
     position: relative;
     word-break: break-word;
     border: 2px solid transparent;
-    transform-style: preserve-3d;
-    backface-visibility: visible;
+    cursor: default;
+    user-select: none;
 }
 
-/* Неоткрытые карты (рубашка) — серые для всех (по умолчанию) */
+/* Неоткрытые карты — серые для всех */
 .card:not(.opened) {
     background: var(--neutral-unopened);
-    border: 2px solid var(--border-light);
+    border-color: var(--border-light);
     color: var(--text-primary);
 }
 
-/* Капитан: неоткрытые карты цветные */
-.captain-view .card:not(.opened).red {
-    background: var(--red-team);
-}
-.captain-view .card:not(.opened).blue {
-    background: var(--blue-team);
-}
-.captain-view .card:not(.opened).black {
-    background: var(--black-card);
-}
-.captain-view .card:not(.opened).neutral {
-    background: var(--neutral-unopened);
-}
-/* Капитан: открытые карты с пониженной насыщенностью */
-.captain-view .card.opened {
-    filter: grayscale(0.5) brightness(0.7) !important;
-}
+/* Капитан: неоткрытые карты цветные.
+   Класс captain-view стоит на #gameBoard */
+.captain-view .card:not(.opened).red     { background: var(--red-team);  color: #fff; border-color: transparent; }
+.captain-view .card:not(.opened).blue    { background: var(--blue-team); color: #fff; border-color: transparent; }
+.captain-view .card:not(.opened).black   { background: var(--black-card); color: #fff; border-color: transparent; }
+.captain-view .card:not(.opened).neutral { background: var(--neutral-unopened); color: var(--text-primary); }
 
-/* Агент: открытые карты без фильтра (оставляем яркими) */
-.agent-view .card.opened {
-    filter: none !important;
-}
-/* Открытые карты — цветные */
+/* Капитан: открытые — потускневшие */
+.captain-view .card.opened { filter: grayscale(0.4) brightness(0.65) !important; }
+
+/* Агент: открытые — яркие */
+.agent-view .card.opened { filter: none !important; }
+
+/* Открытые карты */
 .card.opened {
-    border-color: #fff3;
-    animation: flipIn 0.4s ease-out;
-    color: white;
+    border-color: transparent;
+    animation: flipIn 0.35s ease-out;
 }
 
-.card.opened.red {
-    background: var(--red-team);
-}
-.card.opened.blue {
-    background: var(--blue-team);
-}
-.card.opened.black {
-    background: var(--black-card);
-}
-.card.opened.neutral {
-    background: var(--neutral-opened);
-    color: #000; /* чёрный текст на белом фоне */
-}
-/* Открытые цветные карты всегда с белым текстом */
-.card.opened.red,
-.card.opened.blue,
-.card.opened.black {
-    color: #ffffff !important;
-}
+.card.opened.red     { background: var(--red-team);  color: #fff !important; }
+.card.opened.blue    { background: var(--blue-team); color: #fff !important; }
+.card.opened.black   { background: var(--black-card); color: #fff !important; }
+.card.opened.neutral { background: var(--neutral-opened); color: var(--text-primary) !important; }
 
-/* Для тёмной темы текст на открытых нейтральных картах тоже чёрный */
-body.dark-theme .card.opened.neutral {
-    color: #000;
-}
+/* FIX светлой темы: нейтральные открытые — тёмный текст */
+body.light-theme .card.opened.neutral { color: #1a2639 !important; }
+/* FIX светлой темы: неоткрытые карты агентов — текст виден */
+body.light-theme .card:not(.opened) { color: #1a2639; }
 
-/* Анимация поворота */
 @keyframes flipIn {
-    0% {
-        transform: perspective(400px) rotateY(90deg);
-        opacity: 0;
-    }
-    40% {
-        transform: perspective(400px) rotateY(-10deg);
-    }
-    70% {
-        transform: perspective(400px) rotateY(5deg);
-    }
-    100% {
-        transform: perspective(400px) rotateY(0);
-        opacity: 1;
-    }
+    0%   { transform: perspective(400px) rotateY(90deg); opacity: 0; }
+    40%  { transform: perspective(400px) rotateY(-8deg); }
+    100% { transform: perspective(400px) rotateY(0);     opacity: 1; }
 }
 
 /* Удержание */
 .card.holding {
-    transform: scale(0.98);
+    transform: scale(0.97);
     border-color: var(--accent) !important;
-    box-shadow: 0 0 0 3px rgba(79, 158, 255, 0.5);
+    box-shadow: 0 0 0 3px rgba(79, 158, 255, 0.4);
 }
 
 .hold-progress {
@@ -311,155 +269,144 @@ body.dark-theme .card.opened.neutral {
     bottom: 0;
     left: 0;
     width: 0%;
-    height: 4px;
+    height: 3px;
     background: var(--accent);
-    border-radius: 0 0 12px 12px;
+    border-radius: 0 0 10px 10px;
+    transition: width 0.1s linear;
 }
-
-/* ===== ПЛАВАЮЩИЕ КНОПКИ ===== */
-.fab {
-    position: fixed;
-    width: 52px;
-    height: 52px;
-    border-radius: 30px;
-    background: var(--accent);
-    color: white;
-    border: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    display: flex!important;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    cursor: pointer;
-    z-index: 100;
-    transition: 0.2s;
-}
-
-.fab i {
-    display: block;
-    margin: 0;
-    padding: 0;
-    line-height: 1;
-}
-
-.fullscreen-btn {
-    bottom: max(20px, env(safe-area-inset-bottom));
-    right: max(20px, env(safe-area-inset-right));
-}
-
-.burger-btn {
-    bottom: max(20px, env(safe-area-inset-bottom));
-    left: max(20px, env(safe-area-inset-left));
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-}
-
-.fab:active { transform: scale(0.9); }
 
 /* ===== БУРГЕР-МЕНЮ ===== */
 .menu-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.55);
     z-index: 200;
     display: none;
 }
 
 .menu-content {
     position: fixed;
-    bottom: 80px;
-    left: 20px;
-    right: 20px;
+    top: 56px;
+    right: 8px;
+    width: min(280px, calc(100vw - 16px));
     background: var(--bg-secondary);
-    border-radius: 24px;
-    padding: 20px;
+    border-radius: 18px;
+    padding: 16px;
     z-index: 201;
     display: none;
-    max-height: 70vh;
+    max-height: calc(100dvh - 72px);
     overflow-y: auto;
     border: 1px solid var(--border-light);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
 }
 
 .menu-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
+
+.menu-header h3 { font-size: 1rem; }
 
 .menu-close {
     background: none;
     border: none;
     color: var(--text-primary);
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     cursor: pointer;
+    line-height: 1;
+    padding: 2px 6px;
 }
 
-.menu-section {
-    margin-bottom: 20px;
-}
+.menu-section { margin-bottom: 16px; }
 
 .menu-section h4 {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .menu-btn {
     width: 100%;
-    padding: 12px;
+    padding: 11px 12px;
     background: var(--card-bg);
     border: 1px solid var(--border-light);
-    border-radius: 12px;
+    border-radius: 10px;
     color: var(--text-primary);
-    font-size: 1rem;
+    font-size: 0.95rem;
     text-align: left;
     cursor: pointer;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     display: flex;
     align-items: center;
     gap: 10px;
+    transition: background 0.15s;
 }
 
-.menu-btn i {
-    width: 20px;
-    color: var(--accent);
-}
+.menu-btn:active { background: var(--border-light); }
 
-.menu-footer {
-    margin-top: 20px;
-    text-align: center;
-}
+.menu-btn i { width: 18px; color: var(--accent); font-size: 0.9rem; }
+
+.menu-footer { text-align: center; padding-top: 4px; }
 
 .bot-link {
     color: var(--accent);
     text-decoration: none;
-    font-size: 1rem;
+    font-size: 0.95rem;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 7px;
+}
+
+/* ===== СТАТИСТИКА ===== */
+.game-stats {
+    display: flex;
+    gap: 10px;
+    justify-content: space-around;
+    padding: 10px;
+    background: var(--card-bg);
+    border-radius: 10px;
+    border: 1px solid var(--border-light);
+}
+
+.stat { text-align: center; }
+
+.stat-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 3px;
+}
+
+.stat-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
 }
 
 /* ===== МОДАЛКИ ===== */
 .modal {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.75);
     display: none;
     align-items: center;
     justify-content: center;
     z-index: 300;
-    padding: 20px;
+    padding: 16px;
 }
 
 .modal.show { display: flex; }
 
 .modal-content {
     background: var(--bg-secondary);
-    border-radius: 24px;
-    max-width: 400px;
+    border-radius: 20px;
+    max-width: 420px;
     width: 100%;
-    max-height: 80vh;
+    max-height: 85dvh;
     overflow-y: auto;
     border: 1px solid var(--border-light);
 }
@@ -468,89 +415,267 @@ body.dark-theme .card.opened.neutral {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--border-light);
 }
+
+.modal-header h3 { font-size: 1rem; }
 
 .modal-close {
     background: none;
     border: none;
     color: var(--text-primary);
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     cursor: pointer;
 }
 
-.modal-body {
-    padding: 20px;
+.modal-body { padding: 16px 20px; }
+
+/* Правила */
+.rules-intro {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+    line-height: 1.5;
 }
 
-/* ===== СТАТИСТИКА В МЕНЮ ===== */
-.game-stats {
-    display: flex;
-    gap: 15px;
-    justify-content: space-around;
-    padding: 10px;
-    background: var(--card-bg);
-    border-radius: 12px;
+.rules-section {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin: 14px 0 6px;
+    color: var(--text-primary);
+}
+
+.modal-body p {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+}
+
+.rules-list {
+    padding-left: 18px;
+    margin-top: 4px;
+}
+
+.rules-list li {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* ===== ИИ-ПАНЕЛЬ ===== */
+.ai-hint-panel {
+    flex-shrink: 0;
+    background: var(--bg-secondary);
     border: 1px solid var(--border-light);
+    border-radius: 14px;
+    margin-top: 6px;
+    overflow: hidden;
+    transition: all 0.2s;
 }
 
-.stat {
-    text-align: center;
+.ai-hint-panel.collapsed .ai-hint-content { display: none; }
+.ai-hint-panel.collapsed .ai-collapse-btn i { transform: rotate(180deg); }
+
+.ai-hint-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-light);
 }
 
-.stat-label {
-    display: block;
+.ai-hint-panel.collapsed .ai-hint-header { border-bottom: none; }
+
+.ai-hint-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.ai-badge {
+    background: rgba(79, 158, 255, 0.12);
+    color: var(--accent);
+    border: 1px solid rgba(79, 158, 255, 0.25);
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 20px;
+}
+
+.ai-hint-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ai-hint-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 5px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: opacity 0.15s;
+}
+
+.ai-hint-btn:hover    { opacity: 0.85; }
+.ai-hint-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.ai-collapse-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px 6px;
     font-size: 0.8rem;
+    transition: color 0.15s;
+    line-height: 1;
+}
+
+.ai-collapse-btn i { transition: transform 0.2s; display: block; }
+.ai-collapse-btn:hover { color: var(--text-primary); }
+
+.ai-hint-content {
+    padding: 10px 12px;
+}
+
+.ai-hint-placeholder {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.ai-loading {
+    font-size: 0.82rem;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+/* Главная подсказка */
+.ai-main-hint {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.ai-hint-word {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px;
+}
+
+.ai-hint-count {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.ai-targets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 7px;
+}
+
+.ai-target {
+    background: rgba(79, 158, 255, 0.1);
+    border: 1px solid rgba(79, 158, 255, 0.22);
+    color: var(--accent);
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.ai-reasoning {
+    font-size: 0.76rem;
     color: var(--text-secondary);
     margin-bottom: 5px;
+    line-height: 1.5;
+    display: flex;
+    gap: 5px;
 }
 
-.stat-value {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--accent);
+.ai-reasoning i { color: #fbbf24; flex-shrink: 0; margin-top: 1px; font-size: 0.72rem; }
+
+.ai-risk {
+    font-size: 0.73rem;
+    color: #f87171;
+    margin-bottom: 7px;
+    display: flex;
+    gap: 5px;
+    line-height: 1.4;
 }
 
-/* ===== АДАПТАЦИЯ ПОД ЛАНДШАФТ ===== */
-@media (orientation: landscape) {
-    .simple-header, .scoreboard {
-        padding: 4px 8px;
-        margin-bottom: 4px;
-    }
-    .simple-header h1 {
-        font-size: 1.2rem;
-    }
-    .team-count {
-        font-size: 1.5rem;
-    }
-    .board {
-        gap: 3px;
-    }
-    .card {
-        font-size: clamp(13px, 3vw, 18px);
-        padding: 4px 2px;
-    }
+.ai-risk i { flex-shrink: 0; margin-top: 1px; font-size: 0.7rem; }
+
+.ai-alts-label {
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
 }
 
-/* Для очень маленьких экранов */
-@media (max-width: 360px) {
-    .card { font-size: 12px; }
-    .team-count { font-size: 1.5rem; }
-    .simple-header h1 { font-size: 1.2rem; }
+.ai-alts { display: flex; gap: 5px; flex-wrap: wrap; }
+
+.ai-alt {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 16px;
+    border: 1px solid var(--border-light);
+    background: var(--card-bg);
+}
+
+.ai-alt-word  { font-size: 0.78rem; font-weight: 700; color: var(--text-primary); }
+.ai-alt-count { font-size: 0.7rem; color: var(--text-secondary); }
+
+.safety-high   { border-color: rgba(16,185,129,0.35); }
+.safety-medium { border-color: rgba(251,191,36,0.35); }
+.safety-low    { border-color: rgba(239,68,68,0.35);  }
+
+.safety-high   .ai-alt-count { color: #10b981; }
+.safety-medium .ai-alt-count { color: #fbbf24; }
+.safety-low    .ai-alt-count { color: #ef4444; }
+
+.ai-error {
+    font-size: 0.78rem;
+    color: #f87171;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 /* ===== УВЕДОМЛЕНИЯ ===== */
 .notification {
     position: fixed;
-    bottom: 100px;
+    bottom: 24px;
     left: 50%;
     transform: translateX(-50%);
     background: var(--bg-secondary);
     color: var(--text-primary);
-    padding: 12px 24px;
-    border-radius: 30px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    padding: 10px 20px;
+    border-radius: 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
     z-index: 1000;
     display: none;
     border: 1px solid var(--border-light);
@@ -558,211 +683,31 @@ body.dark-theme .card.opened.neutral {
     max-width: 90%;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 0.88rem;
 }
 
-.notification.show { display: block; }
-.notification.success { background: #10b981; color: white; }
-.notification.error { background: #ef4444; color: white; }
-.notification.info { background: var(--accent); color: white; }
+.notification.show    { display: block; }
+.notification.success { background: #10b981; color: white; border-color: transparent; }
+.notification.error   { background: #ef4444; color: white; border-color: transparent; }
+.notification.info    { background: var(--accent); color: white; border-color: transparent; }
 
-/* ===== ИИ-ПАНЕЛЬ ПОДСКАЗОК (добавить в конец style.css) ===== */
-
-.ai-hint-panel {
-    flex-shrink: 0;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-light);
-    border-radius: 16px;
-    margin-top: 8px;
-    overflow: hidden;
-}
-
-.ai-hint-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border-light);
-    background: var(--card-bg);
-}
-
-.ai-hint-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.ai-badge {
-    background: rgba(79, 158, 255, 0.15);
-    color: var(--accent);
-    border: 1px solid rgba(79, 158, 255, 0.3);
-    font-size: 0.65rem;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 20px;
-    letter-spacing: 0.5px;
-}
-
-.ai-hint-btn {
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 20px;
-    padding: 6px 14px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: opacity 0.2s, transform 0.1s;
-}
-
-.ai-hint-btn:hover   { opacity: 0.85; }
-.ai-hint-btn:active  { transform: scale(0.96); }
-.ai-hint-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.ai-hint-content {
-    padding: 10px 14px;
-    min-height: 48px;
-}
-
-.ai-hint-placeholder {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    font-style: italic;
-}
-
-/* Состояние загрузки */
-.ai-loading {
-    font-size: 0.85rem;
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* Основная подсказка */
-.ai-main-hint {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    margin-bottom: 8px;
-}
-
-.ai-hint-word {
-    font-size: 1.6rem;
-    font-weight: 800;
-    color: var(--accent);
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 2px;
-}
-
-.ai-hint-count {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text-secondary);
-}
-
-/* Слова-цели */
-.ai-targets {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    margin-bottom: 8px;
-}
-
-.ai-target {
-    background: rgba(79, 158, 255, 0.12);
-    border: 1px solid rgba(79, 158, 255, 0.25);
-    color: var(--accent);
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-family: 'JetBrains Mono', monospace;
-}
-
-/* Пояснения */
-.ai-reasoning {
-    font-size: 0.78rem;
-    color: var(--text-secondary);
-    margin-bottom: 6px;
-    line-height: 1.5;
-    display: flex;
-    gap: 6px;
-    align-items: flex-start;
-}
-
-.ai-reasoning i { color: #fbbf24; flex-shrink: 0; margin-top: 2px; }
-
-.ai-risk {
-    font-size: 0.75rem;
-    color: #f87171;
-    margin-bottom: 8px;
-    display: flex;
-    gap: 6px;
-    align-items: flex-start;
-    line-height: 1.4;
-}
-
-.ai-risk i { flex-shrink: 0; margin-top: 2px; }
-
-/* Альтернативы */
-.ai-alts-label {
-    font-size: 0.72rem;
-    color: var(--text-secondary);
-    margin-bottom: 5px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.ai-alts {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-.ai-alt {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    border: 1px solid var(--border-light);
-    background: var(--card-bg);
-}
-
-.ai-alt-word  { font-size: 0.8rem; font-weight: 700; color: var(--text-primary); }
-.ai-alt-count { font-size: 0.72rem; color: var(--text-secondary); }
-
-.safety-high   { border-color: rgba(16, 185, 129, 0.4); }
-.safety-medium { border-color: rgba(251, 191, 36, 0.4); }
-.safety-low    { border-color: rgba(239, 68, 68, 0.4); }
-
-.safety-high   .ai-alt-count { color: #10b981; }
-.safety-medium .ai-alt-count { color: #fbbf24; }
-.safety-low    .ai-alt-count { color: #ef4444; }
-
-/* Ошибка ИИ */
-.ai-error {
-    font-size: 0.8rem;
-    color: #f87171;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-}
-
-/* Ландшафтная ориентация — панель компактнее */
+/* ===== ЛАНДШАФТ ===== */
 @media (orientation: landscape) {
+    .simple-header { padding: 4px 10px; margin-bottom: 4px; }
+    .simple-header h1 { font-size: 1.1rem; }
+    .scoreboard { padding: 5px 12px; margin-bottom: 4px; }
+    .team-count { font-size: 1.4rem; }
+    .board { gap: 3px; }
+    .card { font-size: clamp(10px, 2.5vw, 15px); padding: 3px 2px; }
     .ai-hint-panel { margin-top: 4px; }
-    .ai-hint-content { padding: 7px 12px; }
+    .ai-hint-header { padding: 5px 10px; }
+    .ai-hint-content { padding: 6px 10px; }
     .ai-hint-word { font-size: 1.2rem; }
+}
+
+/* ===== МАЛЕНЬКИЕ ЭКРАНЫ ===== */
+@media (max-width: 360px) {
+    .card { font-size: 11px; }
+    .team-count { font-size: 1.5rem; }
+    .simple-header h1 { font-size: 1.1rem; }
 }
