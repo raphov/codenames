@@ -1,6 +1,6 @@
 // ==================== КОНФИГУРАЦИЯ ====================
 const CONFIG = {
-    RENDER_URL: 'dist-microphone-exclude-created.trycloudflare.com',   // только домен, без https://
+    RENDER_URL: 'operated-whereas-bills-quantitative.trycloudflare.com',   // только домен, без https://
     HOLD_DURATION: 1500,          // 1.5 секунды удержания
     VERSION: '4.2.4',
     MAX_RECONNECT_ATTEMPTS: 5,

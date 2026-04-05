@@ -75,7 +75,7 @@ async def generate_ai_hint(hint_data: dict) -> dict:
 
     url = (
         f"https://generativelanguage.googleapis.com/v1beta/models/"
-        f"gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
+        f"gemini-3.1-flash-lite:generateContent?key={GEMINI_API_KEY}"
     )
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
