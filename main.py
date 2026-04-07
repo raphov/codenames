@@ -55,40 +55,35 @@ async def generate_ai_hint(hint_data: dict) -> dict:
 3. Минимально подходит к словам врага
 4. Само слово не должно быть однокоренным ни с одним словом на поле
 
-Верни ТОЛЬКО валидный JSON без markdown-обёртки (без ```json), строго такой формат:
+Верни ТОЛЬКО валидный JSON без markdown-обёртки, строго в таком формате:
 {{
   "hint": "ПОДСКАЗКА",
   "count": 3,
   "targets": ["СЛОВО1", "СЛОВО2", "СЛОВО3"],
-  "reasoning": "Краткое объяснение связи (1-2 предложения)",
-  "risk": "Какие слова могут смутить агентов и почему",
-  "alternatives": [
-    {{"hint": "ПОДСКАЗКА2", "count": 2, "targets": ["СЛОВО1", "СЛОВО2"], "safety": "high"}},
-    {{"hint": "ПОДСКАЗКА3", "count": 2, "targets": ["СЛОВО1", "СЛОВО2"], "safety": "medium"}}
-  ]
+  "reasoning": "Краткое объяснение (1 предложение)",
+  "risk": "Опасные слова и почему",
+  "alt1": "СЛОВО", "alt1count": 2, "alt1safety": "high",
+  "alt2": "СЛОВО", "alt2count": 2, "alt2safety": "medium"
 }}
 
-Значения safety: "high" (риск минимален), "medium" (небольшой риск), "low" (рискованно).
-Пиши все слова ЗАГЛАВНЫМИ буквами.
-Убедись что JSON полностью завершён закрывающей скобкой }}.
+Пиши все слова ЗАГЛАВНЫМИ буквами. Только JSON, никакого текста до или после.
 """
 
     url = (
         f"https://generativelanguage.googleapis.com/v1beta/models/"
-        f"gemini-3.1-flash-lite:generateContent?key={GEMINI_API_KEY}"
+        f"gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
     )
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {
             "temperature": 0.7,
-            "maxOutputTokens": 1200,
         }
     }
 
     raw_text = ''
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=payload, timeout=aiohttp.ClientTimeout(total=20)) as resp:
+            async with session.post(url, json=payload, timeout=aiohttp.ClientTimeout(total=25)) as resp:
                 if resp.status != 200:
                     text = await resp.text()
                     logger.error(f"❌ Gemini API error {resp.status}: {text}")
@@ -105,14 +100,30 @@ async def generate_ai_hint(hint_data: dict) -> dict:
                 raw_text = data['candidates'][0]['content']['parts'][0]['text']
 
                 clean = raw_text.strip()
+                # Убираем ```json ... ``` обёртку которую модель добавляет вопреки запросу
                 if clean.startswith('```'):
-                    clean = clean.split('\n', 1)[-1]
-                if clean.endswith('```'):
-                    clean = clean.rsplit('```', 1)[0]
+                    first_nl = clean.find('\n')
+                    clean = clean[first_nl + 1:] if first_nl != -1 else clean[3:]
+                if '```' in clean:
+                    clean = clean[:clean.rfind('```')]
                 clean = clean.strip()
 
-                result = json.loads(clean)
-                logger.info(f"✅ Gemini hint: {result.get('hint')} x{result.get('count')}")
+                flat = json.loads(clean)
+                # Преобразуем плоский формат обратно в структуру для фронтенда
+                result = {
+                    'hint':     flat.get('hint', '?'),
+                    'count':    flat.get('count', 1),
+                    'targets':  flat.get('targets', []),
+                    'reasoning': flat.get('reasoning', ''),
+                    'risk':     flat.get('risk', ''),
+                    'alternatives': [
+                        a for a in [
+                            {'hint': flat.get('alt1'), 'count': flat.get('alt1count', 1), 'safety': flat.get('alt1safety', 'medium')} if flat.get('alt1') else None,
+                            {'hint': flat.get('alt2'), 'count': flat.get('alt2count', 1), 'safety': flat.get('alt2safety', 'medium')} if flat.get('alt2') else None,
+                        ] if a
+                    ]
+                }
+                logger.info(f"✅ Gemini hint: {result['hint']} x{result['count']}")
                 return result
 
     except json.JSONDecodeError as e:
