@@ -1,6 +1,6 @@
 // ==================== КОНФИГУРАЦИЯ ====================
 const CONFIG = {
-    RENDER_URL: 'mysimon-url-photos-thickness.trycloudflare.com',   // только домен, без https://
+    RENDER_URL: 'contest-nova-leading-occurred.trycloudflare.com',   // только домен, без https://
     HOLD_DURATION: 600,          // 1.5 секунды удержания (1500было)
     VERSION: '4.2.4',
     MAX_RECONNECT_ATTEMPTS: 5,
